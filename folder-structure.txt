@@ -1,128 +1,266 @@
-.
-./.gitignore
-./backend
-./backend/.env
-./backend/.env.example
-./backend/config
-./backend/config/db.js
-./backend/controllers
-./backend/controllers/adminController.js
-./backend/controllers/appointmentController.js
-./backend/controllers/authController.js
-./backend/controllers/chatbotController.js
-./backend/controllers/departmentController.js
-./backend/controllers/doctorController.js
-./backend/controllers/paymentController.js
-./backend/controllers/prescriptionController.js
-./backend/controllers/slotController.js
-./backend/index.js
-./backend/middleware
-./backend/middleware/auth.js
-./backend/middleware/error.js
-./backend/middleware/upload.js
-./backend/models
-./backend/models/Appointment.js
-./backend/models/Department.js
-./backend/models/Doctor.js
-./backend/models/Payment.js
-./backend/models/Prescription.js
-./backend/models/User.js
-./backend/package-lock.json
-./backend/package.json
-./backend/README.md
-./backend/routes
-./backend/routes/adminRoutes.js
-./backend/routes/appointmentRoutes.js
-./backend/routes/authRoutes.js
-./backend/routes/chatbotRoutes.js
-./backend/routes/departmentRoutes.js
-./backend/routes/doctorRoutes.js
-./backend/routes/paymentRoutes.js
-./backend/routes/prescriptionRoutes.js
-./backend/seed.js
-./backend/utils
-./backend/utils/asyncHandler.js
-./backend/utils/clinicKnowledge.js
-./backend/utils/errorResponse.js
-./backend/utils/slotGenerator.js
-./env.example
-./folder-structure.txt
-./frontend
-./frontend/.env
-./frontend/.env.example
-./frontend/folder-structure.txt
-./frontend/index.html
-./frontend/package-lock.json
-./frontend/package.json
-./frontend/postcss.config.cjs
-./frontend/public
-./frontend/public/images
-./frontend/public/images/hero
-./frontend/public/images/hero/2.jpg
-./frontend/public/images/hero/pexels-contact-me-923323219715-262056873-13176356.jpg
-./frontend/public/images/hero/pexels-tima-miroshnichenko-5452282.jpg
-./frontend/README.md
-./frontend/src
-./frontend/src/App.jsx
-./frontend/src/components
-./frontend/src/components/common
-./frontend/src/components/common/Footer.jsx
-./frontend/src/components/common/Navbar.jsx
-./frontend/src/components/PrescriptionForm.jsx
-./frontend/src/components/ProtectedRoute.jsx
-./frontend/src/components/ui
-./frontend/src/components/ui/ChatbotWidget.jsx
-./frontend/src/components/ui/DoctorCard.jsx
-./frontend/src/components/ui/HeroSlider.jsx
-./frontend/src/components/ui/NeumorphicBox.jsx
-./frontend/src/components/ui/PageTransition.jsx
-./frontend/src/components/ui/SkeletonLoader.jsx
-./frontend/src/context
-./frontend/src/context/AuthContext.jsx
-./frontend/src/layouts
-./frontend/src/layouts/DashboardLayout.jsx
-./frontend/src/layouts/PublicLayout.jsx
-./frontend/src/main.jsx
-./frontend/src/pages
-./frontend/src/pages/AboutPage.jsx
-./frontend/src/pages/admin
-./frontend/src/pages/admin/AdminAppointmentsPage.jsx
-./frontend/src/pages/admin/AdminDepartmentsPage.jsx
-./frontend/src/pages/admin/AdminDoctorsPage.jsx
-./frontend/src/pages/admin/AdminRefundsPage.jsx
-./frontend/src/pages/admin/AdminRevenueChartPage.jsx
-./frontend/src/pages/admin/AdminUsersPage.jsx
-./frontend/src/pages/AppointmentsDashboard.jsx
-./frontend/src/pages/ContactPage.jsx
-./frontend/src/pages/dashboard
-./frontend/src/pages/dashboard/AdminDashboard.jsx
-./frontend/src/pages/dashboard/DoctorDashboard.jsx
-./frontend/src/pages/dashboard/DoctorEarningsPage.jsx
-./frontend/src/pages/dashboard/OverviewDashboard.jsx
-./frontend/src/pages/dashboard/PatientDashboard.jsx
-./frontend/src/pages/DepartmentsPage.jsx
-./frontend/src/pages/DoctorDetailsPage.jsx
-./frontend/src/pages/DoctorsPage.jsx
-./frontend/src/pages/ForgotPasswordPage.jsx
-./frontend/src/pages/HomePage.jsx
-./frontend/src/pages/LoginPage.jsx
-./frontend/src/pages/PaymentsPage.jsx
-./frontend/src/pages/PrescriptionsPage.jsx
-./frontend/src/pages/ProfilePage.jsx
-./frontend/src/pages/RegisterPage.jsx
-./frontend/src/pages/ResetPasswordPage.jsx
-./frontend/src/styles
-./frontend/src/styles/index.css
-./frontend/src/utils
-./frontend/src/utils/axios.js
-./frontend/tailwind.config.js
-./frontend/vercel.json
-./frontend/vite.config.js
-./FULL_ANALYSIS.md
-./GIT_COLLABORATION_GUIDE.md
-./HOW_TO_RUN.md
-./README.md
-./README_Short.md
-./render.yaml
-./SHIFACARE_SETUP_GUIDE.md
-./test_audit.md
+==============================
+COMPLETE PROJECT STRUCTURE
+==============================
+
+ShifaCare/
+│
+├── .gitignore
+├── env.example
+├── folder-structure.txt
+├── FULL_ANALYSIS.md
+├── GIT_COLLABORATION_GUIDE.md
+├── HOW_TO_RUN.md
+├── README.md
+├── README_Short.md
+├── render.yaml
+├── root.zip
+├── SHIFACARE_SETUP_GUIDE.md
+├── split_project.py
+├── test_audit.md
+├── TESTING_INSTRUCTIONS.md
+│
+├── backend/
+│   ├── .env
+│   ├── .env.example
+│   ├── backend.zip
+│   ├── index.js
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── README.md
+│   ├── seed.js
+│   ├── config/
+│   │   └── db.js
+│   ├── controllers/
+│   │   ├── adminController.js
+│   │   ├── appointmentController.js
+│   │   ├── authController.js
+│   │   ├── chatbotController.js
+│   │   ├── departmentController.js
+│   │   ├── doctorController.js
+│   │   ├── paymentController.js
+│   │   ├── prescriptionController.js
+│   │   └── slotController.js
+│   ├── middleware/
+│   │   ├── auth.js
+│   │   ├── error.js
+│   │   └── upload.js
+│   ├── models/
+│   │   ├── Appointment.js
+│   │   ├── Department.js
+│   │   ├── Doctor.js
+│   │   ├── Payment.js
+│   │   ├── Prescription.js
+│   │   └── User.js
+│   ├── routes/
+│   │   ├── adminRoutes.js
+│   │   ├── appointmentRoutes.js
+│   │   ├── authRoutes.js
+│   │   ├── chatbotRoutes.js
+│   │   ├── departmentRoutes.js
+│   │   ├── doctorRoutes.js
+│   │   ├── paymentRoutes.js
+│   │   └── prescriptionRoutes.js
+│   └── utils/
+│       ├── asyncHandler.js
+│       ├── clinicKnowledge.js
+│       ├── errorResponse.js
+│       └── slotGenerator.js
+│
+└── frontend/
+    ├── .env
+    ├── .env.example
+    ├── folder-structure.txt
+    ├── frontend.zip
+    ├── index.html
+    ├── package.json
+    ├── package-lock.json
+    ├── postcss.config.cjs
+    ├── README.md
+    ├── tailwind.config.js
+    ├── vercel.json
+    ├── vite.config.js
+    ├── public/
+    │   └── images/
+    │       └── hero/
+    │           ├── 2.jpg
+    │           ├── pexels-contact-me-923323219715-262056873-13176356.jpg
+    │           └── pexels-tima-miroshnichenko-5452282.jpg
+    └── src/
+        ├── App.jsx
+        ├── i18n.js
+        ├── main.jsx
+        ├── components/
+        │   ├── PrescriptionForm.jsx
+        │   ├── ProtectedRoute.jsx
+        │   ├── common/
+        │   │   ├── Footer.jsx
+        │   │   └── Navbar.jsx
+        │   └── ui/
+        │       ├── ChatbotWidget.jsx
+        │       ├── DoctorCard.jsx
+        │       ├── HeroSlider.jsx
+        │       ├── NeumorphicBox.jsx
+        │       ├── PageTransition.jsx
+        │       └── SkeletonLoader.jsx
+        ├── context/
+        │   └── AuthContext.jsx
+        ├── layouts/
+        │   ├── DashboardLayout.jsx
+        │   └── PublicLayout.jsx
+        ├── locales/
+        │   ├── bn.json
+        │   └── en.json
+        ├── pages/
+        │   ├── AboutPage.jsx
+        │   ├── AppointmentsDashboard.jsx
+        │   ├── ContactPage.jsx
+        │   ├── DepartmentsPage.jsx
+        │   ├── DoctorDetailsPage.jsx
+        │   ├── DoctorsPage.jsx
+        │   ├── ForgotPasswordPage.jsx
+        │   ├── HomePage.jsx
+        │   ├── LoginPage.jsx
+        │   ├── PaymentsPage.jsx
+        │   ├── PrescriptionsPage.jsx
+        │   ├── ProfilePage.jsx
+        │   ├── RegisterPage.jsx
+        │   ├── ResetPasswordPage.jsx
+        │   ├── admin/
+        │   │   ├── AdminAppointmentsPage.jsx
+        │   │   ├── AdminDepartmentsPage.jsx
+        │   │   ├── AdminDoctorsPage.jsx
+        │   │   ├── AdminRefundsPage.jsx
+        │   │   ├── AdminRevenueChartPage.jsx
+        │   │   └── AdminUsersPage.jsx
+        │   └── dashboard/
+        │       ├── AdminDashboard.jsx
+        │       ├── DoctorDashboard.jsx
+        │       ├── DoctorEarningsPage.jsx
+        │       ├── OverviewDashboard.jsx
+        │       └── PatientDashboard.jsx
+        ├── styles/
+        │   └── index.css
+        └── utils/
+            ├── axios.js
+            └── exportCsv.js
+
+
+================================================================================
+PORTION 1: PUBLIC PAGES PART
+================================================================================
+(Responsible for: Public-facing website, authentication, chatbot, and
+ shared UI components that every user sees)
+
+Backend Files:
+├── backend/controllers/authController.js
+├── backend/controllers/chatbotController.js
+├── backend/controllers/departmentController.js
+├── backend/controllers/slotController.js
+├── backend/middleware/auth.js
+├── backend/middleware/upload.js
+├── backend/routes/authRoutes.js
+├── backend/routes/chatbotRoutes.js
+├── backend/routes/departmentRoutes.js
+├── backend/utils/asyncHandler.js
+├── backend/utils/clinicKnowledge.js
+├── backend/utils/errorResponse.js
+├── backend/utils/slotGenerator.js
+├── backend/models/Department.js
+├── backend/models/User.js
+
+Frontend Files:
+├── frontend/src/App.jsx
+├── frontend/src/i18n.js
+├── frontend/src/main.jsx
+├── frontend/src/components/common/Footer.jsx
+├── frontend/src/components/common/Navbar.jsx
+├── frontend/src/components/ui/ChatbotWidget.jsx
+├── frontend/src/components/ui/DoctorCard.jsx
+├── frontend/src/components/ui/HeroSlider.jsx
+├── frontend/src/components/ui/NeumorphicBox.jsx
+├── frontend/src/components/ui/PageTransition.jsx
+├── frontend/src/components/ui/SkeletonLoader.jsx
+├── frontend/src/components/ProtectedRoute.jsx
+├── frontend/src/layouts/PublicLayout.jsx
+├── frontend/src/locales/en.json
+├── frontend/src/locales/bn.json
+├── frontend/src/pages/HomePage.jsx
+├── frontend/src/pages/AboutPage.jsx
+├── frontend/src/pages/ContactPage.jsx
+├── frontend/src/pages/DepartmentsPage.jsx
+├── frontend/src/pages/DoctorsPage.jsx
+├── frontend/src/pages/DoctorDetailsPage.jsx
+├── frontend/src/pages/LoginPage.jsx
+├── frontend/src/pages/RegisterPage.jsx
+├── frontend/src/pages/ForgotPasswordPage.jsx
+├── frontend/src/pages/ResetPasswordPage.jsx
+├── frontend/src/pages/ProfilePage.jsx
+├── frontend/src/styles/index.css
+├── frontend/public/images/hero/2.jpg
+├── frontend/public/images/hero/pexels-contact-me-923323219715-262056873-13176356.jpg
+├── frontend/public/images/hero/pexels-tima-miroshnichenko-5452282.jpg
+
+
+================================================================================
+PORTION 2: ADMIN PART
+================================================================================
+(Responsible for: Admin dashboard, management panels, analytics,
+ revenue tracking, user/doctor/department management, refunds)
+
+Backend Files:
+├── backend/controllers/adminController.js
+├── backend/controllers/doctorController.js
+├── backend/controllers/departmentController.js
+├── backend/routes/adminRoutes.js
+├── backend/routes/doctorRoutes.js
+├── backend/routes/departmentRoutes.js
+├── backend/models/User.js
+├── backend/models/Doctor.js
+├── backend/models/Department.js
+
+Frontend Files:
+├── frontend/src/layouts/DashboardLayout.jsx
+├── frontend/src/pages/dashboard/AdminDashboard.jsx
+├── frontend/src/pages/dashboard/OverviewDashboard.jsx
+├── frontend/src/pages/admin/AdminAppointmentsPage.jsx
+├── frontend/src/pages/admin/AdminDepartmentsPage.jsx
+├── frontend/src/pages/admin/AdminDoctorsPage.jsx
+├── frontend/src/pages/admin/AdminRefundsPage.jsx
+├── frontend/src/pages/admin/AdminRevenueChartPage.jsx
+├── frontend/src/pages/admin/AdminUsersPage.jsx
+├── frontend/src/utils/exportCsv.js
+
+
+================================================================================
+PORTION 3: DOCTOR-PATIENT PART
+================================================================================
+(Responsible for: Patient and doctor dashboards, appointment booking,
+ payment processing, prescriptions, earnings, video consultation)
+
+Backend Files:
+├── backend/controllers/appointmentController.js
+├── backend/controllers/paymentController.js
+├── backend/controllers/prescriptionController.js
+├── backend/controllers/doctorController.js
+├── backend/controllers/slotController.js
+├── backend/routes/appointmentRoutes.js
+├── backend/routes/paymentRoutes.js
+├── backend/routes/prescriptionRoutes.js
+├── backend/routes/doctorRoutes.js
+├── backend/utils/slotGenerator.js
+├── backend/models/Appointment.js
+├── backend/models/Payment.js
+├── backend/models/Prescription.js
+├── backend/models/Doctor.js
+
+Frontend Files:
+├── frontend/src/context/AuthContext.jsx
+├── frontend/src/components/PrescriptionForm.jsx
+├── frontend/src/pages/AppointmentsDashboard.jsx
+├── frontend/src/pages/PaymentsPage.jsx
+├── frontend/src/pages/PrescriptionsPage.jsx
+├── frontend/src/pages/dashboard/PatientDashboard.jsx
+├── frontend/src/pages/dashboard/DoctorDashboard.jsx
+├── frontend/src/pages/dashboard/DoctorEarningsPage.jsx
+├── frontend/src/pages/dashboard/OverviewDashboard.jsx
+├── frontend/src/utils/axios.js

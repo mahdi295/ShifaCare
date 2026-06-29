@@ -1,6 +1,6 @@
 # ShifaCare
 
-**ShifaCare** is a full-stack Hospital Management System built for healthcare delivery in Bangladesh. It covers patient self-service (appointment booking, prescriptions, payments), role-aware staff dashboards (doctor queue management, admin analytics), and a public-facing website — all in one monorepo.
+**ShifaCare** is a full-stack Hospital Management System built for healthcare delivery in Bangladesh. It covers patient self-service (appointment booking, prescriptions, payments), role-aware staff dashboards (doctor queue management, admin analytics), AI chatbot assistance, video consultations, and a public-facing website — all in one monorepo.
 
 ---
 
@@ -24,38 +24,46 @@
 ## Features
 
 ### Public Website
-- **Home page** with live doctor listing, services overview, FAQ accordion, and patient testimonials.
+- **Home page** with hero image carousel (auto-rotate 3s), live stats strip (doctors/patients/appointments/departments), 6 service cards, featured doctors, department grid, infinite-scroll testimonials carousel, FAQ accordion, and CTA banner.
 - **Doctors page** with real-time search by name/specialization and filters by department and availability.
 - **Doctor detail page** with live 30-minute time slot availability and inline appointment booking.
 - **Departments page** listing all medical departments with their available doctors.
-- **About** and **Contact** pages.
+- **About** page with mission, vision, values, and leadership sections.
+- **Contact** page with address, phone, email, working hours, and contact form (frontend-only).
+- **AI Chatbot** (floating widget, bottom-right) powered by Groq API (Llama 3.3 70B) — answers platform questions, triages symptoms, and suggests real departments/doctors from the database.
+- **Bengali/English language toggle** — full i18n for Navbar, Footer, About, Login, Register pages.
 
 ### Patient Portal
-- Register / login / logout with JWT-based session (cookie + bearer token).
-- Forgot password → reset via email link (10-minute expiry) with safe fallback for dev environments.
-- Book appointments with any available doctor on any available slot.
-- **Reschedule** appointments to a new date/slot with real-time conflict checking.
+- Register / login / logout with JWT-based session (httpOnly cookie + Bearer token).
+- Forgot password & reset via email link (10-minute expiry, SHA-256 token, safe dev fallback).
+- Browse and book appointments with any available doctor on any available slot.
+- **Reschedule** appointments to a new date/slot with real-time slot fetching and conflict checking.
 - View upcoming and past appointments with status tracking.
 - Pay consultation fees via **SSLCommerz** (bKash, Nagad, Rocket, Visa, MasterCard).
-- **Download/Print Payment Receipts** for successful transactions.
+- **Download/Print Payment Receipts** for successful transactions (jsPDF, styled).
 - **Request Refunds** for paid appointments (subject to admin review).
 - View digital prescriptions issued by doctors.
-- Update profile (name, phone, address, avatar) and change password.
+- Update profile (name, phone, address, avatar via Cloudinary) and change password.
+- **Video Consultation** — Join a free Jitsi Meet room with the doctor for confirmed appointments (no sign-up, no API key).
 
 ### Doctor Dashboard
 - View today's patient queue sorted by slot time.
 - Confirm pending appointments (check-in).
 - Issue digital prescriptions (diagnosis + dynamic medicine list + advice + follow-up date), which auto-completes the appointment.
-- **My Earnings Dashboard** — Track total revenue, monthly trends, and patient history.
+- **My Earnings Dashboard** — Track total revenue, this month, last month, growth %, monthly area chart, recent payments table.
 - Toggle personal availability to stop new bookings.
 - View full appointment history.
+- Join video calls with patients via Jitsi.
 
 ### Admin Dashboard
-- **Advanced System Analytics**: Real-time charts for monthly revenue, top-performing doctors, and appointment status breakdown.
-- **All Appointments Management**: Centralized view of every appointment in the system with advanced filters (date, status, search).
-- **Refund Management**: Review, approve, or reject patient refund requests with automated appointment cancellation.
+- **System Analytics** — Real-time counts for doctors/patients/appointments/departments, today's appointments, monthly revenue.
+- **All Appointments Management** — Centralized view of every appointment with advanced filters (status, date, doctor/patient search).
+- **Revenue & Analytics Charts** — Monthly revenue area chart (12 months), top 5 doctors bar chart, appointment status breakdown pie chart, CSV export.
+- **Refund Management** — Review, approve, or reject patient refund requests with automated appointment cancellation.
+- **CSV Export** — Export data from All Appointments, Users, and Revenue pages.
 - User management: list all users with role/search filters, activate/deactivate accounts.
-- Create doctor accounts with a default or specified password.
+- Create doctor accounts (creates User + Doctor profile).
+- Manage departments (CRUD, blocked if doctors assigned).
 - Manual payment confirmation for offline/pending transactions.
 
 ---
@@ -72,14 +80,14 @@
 │  └─────────────┘  └──────────────────┘  └──────────────────┘   │
 │                           │  axios (withCredentials)             │
 └───────────────────────────┼─────────────────────────────────────┘
-                            │ HTTP/HTTPS
+                            │ HTTP/HTTPS (Vite proxy in dev)
 ┌───────────────────────────▼─────────────────────────────────────┐
 │                    Express API Server (:5000)                    │
 │                                                                  │
-│  Routes (/api/v1/*)   Controllers   Middleware                   │
+│  Routes (/api/v1/*)   Controllers   Middleware   Utils           │
 │  ┌──────────────────────────────────────────────────────────┐   │
 │  │ auth · departments · doctors · appointments              │   │
-│  │ prescriptions · payments · admin                         │   │
+│  │ prescriptions · payments · admin · chatbot               │   │
 │  └──────────────────────────────────────────────────────────┘   │
 │                           │                                      │
 │  ┌────────────────────────▼──────────────────────────────┐      │
@@ -94,7 +102,11 @@
    ┌────────▼───┐  ┌───────▼──────┐  ┌─────▼────────┐
    │  MongoDB   │  │  Cloudinary  │  │  SSLCommerz  │
    │  Atlas     │  │  (Images)    │  │  (Payments)  │
-   └────────────┘  └──────────────┘  └──────────────┘
+   └────────────┘  └──────────────┘  └──────┬────────┘
+                                            │ Groq API
+                                            │ (Chatbot)
+                                            ▼
+                                       Llama 3.3 70B
 ```
 
 ---
@@ -105,35 +117,47 @@
 shifacare/
 ├── backend/                    # Node.js + Express REST API
 │   ├── README.md               # Backend-specific documentation
-│   ├── index.js
+│   ├── index.js                # Entry point (helmet, CORS, rate-limit, routes)
 │   ├── .env.example
+│   ├── seed.js                 # Demo data seeder
 │   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   └── utils/
+│   │   └── db.js               # MongoDB connection
+│   ├── controllers/            # Business logic (9 files)
+│   ├── middleware/              # Auth, upload, error handler
+│   ├── models/                 # Mongoose schemas (6 models)
+│   ├── routes/                 # Express routers (8 route groups)
+│   └── utils/                  # Helpers (slotGenerator, clinicKnowledge, errors)
 │
 ├── frontend/                   # React + Vite SPA
 │   ├── src/
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   ├── context/
-│   │   ├── layouts/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── styles/
-│   │   └── utils/
+│   │   ├── App.jsx             # Route definitions
+│   │   ├── main.jsx            # React root, QueryClient, i18n
+│   │   ├── i18n.js             # i18next config (en + bn)
+│   │   ├── context/            # AuthContext (JWT auth state)
+│   │   ├── layouts/            # PublicLayout, DashboardLayout
+│   │   ├── components/         # Navbar, Footer, HeroSlider, DoctorCard,
+│   │   │                       # ChatbotWidget, PrescriptionForm, etc.
+│   │   ├── pages/              # 18 route-level page components
+│   │   │   ├── admin/          # 6 admin-only pages
+│   │   │   └── dashboard/      # 5 role-aware dashboard pages
+│   │   ├── styles/             # Tailwind entry
+│   │   ├── utils/              # Axios instance, CSV export
+│   │   └── locales/            # en.json, bn.json (i18n)
+│   ├── public/images/hero/     # Hero slider images
 │   ├── index.html
-│   ├── vite.config.js
-│   └── tailwind.config.js
+│   ├── vite.config.js          # Vite 8, proxy, manualChunks
+│   └── tailwind.config.js      # Custom design system
 │
 ├── .gitignore
 ├── .env.example
+├── render.yaml                 # Render.com backend deployment
+├── vercel.json (in frontend/)  # Vercel SPA deployment
 ├── README.md
 ├── SHIFACARE_SETUP_GUIDE.md
 ├── HOW_TO_RUN.md
-└── GIT_COLLABORATION_GUIDE.md
+├── GIT_COLLABORATION_GUIDE.md
+├── TESTING_INSTRUCTIONS.md
+└── test_audit.md
 ```
 
 ---
@@ -142,11 +166,11 @@ shifacare/
 
 | Role      | Registration  | Key Capabilities                                                       |
 |-----------|---------------|------------------------------------------------------------------------|
-| `patient` | Self-register | Book appointments, pay fees, view prescriptions                        |
-| `doctor`  | Admin creates | View queue, confirm appointments, issue prescriptions, toggle availability |
-| `admin`   | Admin creates | Everything above + analytics, user management, doctor/department management |
+| `patient` | Self-register | Book/reschedule appointments, pay fees, request refunds, view prescriptions, join video calls |
+| `doctor`  | Admin creates | View queue, confirm appointments, issue prescriptions, toggle availability, view earnings |
+| `admin`   | Manually set  | Everything above + analytics, user/doctor/department management, refund approval, CSV export |
 
-> Public registration always creates a `patient`. Doctor and admin accounts are created exclusively by an existing admin via `POST /api/v1/auth/create-staff`.
+> Public registration always creates a `patient`. Doctor accounts are created by an admin via the Admin Dashboard. Admins must be set directly in MongoDB Atlas.
 
 ---
 
@@ -154,17 +178,27 @@ shifacare/
 
 | Layer         | Technology                                                      |
 |---------------|-----------------------------------------------------------------|
-| Frontend      | React 18, Vite 7, React Router 6                                |
-| Styling       | Tailwind CSS 3, Framer Motion (transitions), Lucide (icons)     |
+| Frontend      | React 18, Vite 8, React Router 6                                |
+| Styling       | Tailwind CSS 3 (custom medical-blue palette), Framer Motion 11, Lucide React icons |
 | Forms         | react-hook-form + Zod validation                                |
 | HTTP Client   | Axios (pre-configured with base URL and credentials)            |
+| Server State  | @tanstack/react-query (5-min stale time, auto-retry)           |
+| Charts        | Recharts 2.12.7 (Area, Bar, Pie charts)                        |
+| PDF           | jsPDF + jspdf-autotable (receipts)                             |
 | Toasts        | Sonner                                                          |
+| i18n          | i18next + react-i18next (English + Bengali)                    |
+| Utilities     | clsx, tailwind-merge                                            |
 | Backend       | Node.js (ES Modules), Express 4                                 |
 | Database      | MongoDB via Mongoose 8                                          |
 | Auth          | JWT (httpOnly cookie + Bearer header), bcrypt (10 rounds)       |
 | Image Storage | Cloudinary (memory stream, face-crop transform, 400×400)        |
 | Payments      | SSLCommerz (sandbox/live via env flag)                          |
+| AI Chatbot    | Groq API (Llama 3.3 70B, function-calling for DB lookups)      |
+| Email         | Nodemailer (SMTP, dev fallback returns reset URL in API)        |
+| Security      | Helmet, CORS, express-rate-limit (200 req/min, 20/min chatbot)  |
+| File Upload   | Multer (images only, 2MB max)                                   |
 | Dev Tooling   | nodemon, Vite HMR                                               |
+| Deploy        | Render (backend), Vercel (frontend)                             |
 
 ---
 
@@ -175,6 +209,7 @@ shifacare/
 - MongoDB Atlas URI (or local MongoDB)
 - Cloudinary account (free tier works)
 - SSLCommerz sandbox credentials (for payment testing)
+- Groq API key (free at https://console.groq.com — for AI chatbot)
 
 ### 1. Clone & Install
 
@@ -204,6 +239,8 @@ cd backend
 npm run seed
 ```
 
+This creates 15 departments, 15 doctors, 5 patients, 1 admin, 3 appointments, 2 payments, and 1 prescription.
+
 ### 4. Run Both Servers
 
 Open two terminals:
@@ -219,6 +256,11 @@ npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+**Demo credentials (after seeding):**
+- Admin: `admin@shifacare.com` / `Admin@2024`
+- Patient: `rahim@gmail.com` / `Admin@2024`
+- Doctor: `arafat@shifacare.com` / `Admin@2024`
 
 ---
 
@@ -252,6 +294,18 @@ CLOUDINARY_API_SECRET=your_api_secret
 SSL_STORE_ID=your_store_id
 SSL_STORE_PASS=your_store_password
 SSL_IS_LIVE=false           # true for production
+
+# Email (optional — dev fallback returns reset URL in API response)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your@email.com
+SMTP_PASS=your_app_password
+FROM_EMAIL=your@email.com
+FROM_NAME=ShifaCare
+
+# AI Chatbot (Groq)
+GROQ_API_KEY=gsk_your_groq_api_key
+GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
 **Frontend environment** (optional, `frontend/.env`):
@@ -259,6 +313,8 @@ SSL_IS_LIVE=false           # true for production
 ```env
 VITE_API_URL=/api/v1        # default; override for production deployments
 ```
+
+> **Important for Local Testing**: For SSLCommerz IPN (Instant Payment Notification) to work locally, use **ngrok** to provide a public URL for your backend. Set `BACKEND_URL` to your ngrok URL in `.env`.
 
 ---
 
@@ -299,6 +355,7 @@ Transitions:
 - `pending → confirmed`: by doctor or admin (check-in).
 - `confirmed → completed`: by doctor (when issuing a prescription, auto-completed).
 - Any non-completed → `cancelled`: by patient (own), or admin.
+- Paid cannot be cancelled directly — must use refund flow.
 
 ### Prescription Issuance
 
@@ -333,11 +390,36 @@ Browser redirects to SSLCommerz payment page
 User completes payment (bKash / Nagad / Card / etc.)
         │
 SSLCommerz POSTs to one of:
-  ├── /payments/success/:tran_id → marks Payment successful, Appointment paid → redirect frontend
+  ├── /payments/success/:tran_id → validates via SSLCommerz API → marks Payment successful + Appointment paid → redirect frontend
   ├── /payments/fail/:tran_id   → marks Payment failed → redirect frontend
   └── /payments/cancel/:tran_id → marks Payment cancelled → redirect frontend
         │
 Frontend reads ?payment= query param on AppointmentsDashboard load → shows toast
+```
+
+### Payment Status Flow
+
+```
+pending → successful → refund_requested → refunded
+       ↘ failed
+       ↘ cancelled
+```
+
+### Refund Flow
+
+```
+Patient clicks "Request Refund" on paid appointment
+        │
+POST /payments/:id/refund (body: { refundReason })
+        │ Payment status → refund_requested
+        ▼
+Admin reviews in Admin Dashboard → Refund Requests
+        │
+POST /payments/:id/refund (same endpoint, admin context)
+        │ Payment status → refunded
+        │ Appointment status → cancelled
+        ▼
+Completed
 ```
 
 ### Sandbox vs Production
@@ -363,24 +445,32 @@ Frontend reads ?payment= query param on AppointmentsDashboard load → shows toa
 | File upload safety         | Multer limits: images only, 2 MB max                            |
 | Appointment ownership      | Patients can only view/cancel their own appointments            |
 | Prescription authorization | Doctors can only prescribe for their own appointments           |
-| CORS                       | Restricted to `CLIENT_URL` env variable                         |
+| Paid cancel protection     | Paid appointments cannot be cancelled directly — must use refund flow |
+| IPN validation             | IPN endpoint re-validates `val_id` with SSLCommerz before marking successful |
+| CORS                       | Restricted to `CLIENT_URL` env variable + common dev ports + sslcommerz.com |
 | Production cookies         | `secure: true` + `sameSite: 'none'` enabled in production mode  |
+| Rate limiting              | 200 req/min general API, 20 req/min chatbot                      |
 
 ---
 
 ## Known Limitations & TODOs
 
-- **Email**: `nodemailer` is wired but email sending is not implemented in production. In `NODE_ENV=development`, the reset URL is returned in the API response as a dev helper.
-- **SSLCommerz validation**: The `paymentSuccess` handler does not validate `val_id` with SSLCommerz's validation API (noted in the code). This must be implemented before going live.
+- **Email**: `nodemailer` is wired but email sending is not fully production-tested. In `NODE_ENV=development`, the reset URL is returned in the API response as a dev helper.
 - **Register page role selector**: The frontend `RegisterPage` has a role dropdown, but the backend ignores it for security. This should be removed from the UI.
 - **PDF download**: The "Download PDF" button on `PrescriptionsPage` has no backend endpoint wired yet.
 - **Contact form**: The Contact page form has no backend endpoint connected.
+- **Chatbot**: Hallucination guard is implemented but may occasionally need refinement.
+- **Testing**: No automated test framework is set up — all testing is manual (see `test_audit.md`).
 
 ---
 
 ## Detailed Documentation
 
 - [Backend README →](./backend/README.md) — Full API reference, model schemas, controller logic, middleware details.
+- [Frontend README →](./frontend/README.md) — Pages, features, tech stack.
 - [Setup Guide →](./SHIFACARE_SETUP_GUIDE.md) — Setup, environment, seeding, and run instructions.
 - [Quick Run →](./HOW_TO_RUN.md) — Fast local startup commands.
 - [Git Collaboration Guide →](./GIT_COLLABORATION_GUIDE.md) — Branching strategy and contributor scope.
+- [Testing Instructions →](./TESTING_INSTRUCTIONS.md) — Step-by-step testing guide.
+- [Test Audit →](./test_audit.md) — Comprehensive test case list.
+- [Full Analysis →](./FULL_ANALYSIS.md) — Historical development log and change tracking.
