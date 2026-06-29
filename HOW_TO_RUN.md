@@ -35,3 +35,4 @@ npm run seed
 - Backend uses Express + MongoDB + JWT auth.
 - `frontend/.env` is optional and only needed if you want to override `VITE_API_URL`.
 - There are three user roles: `patient` (self-register), `doctor` (admin creates), `admin` (set manually in MongoDB Atlas).
+- The AI chatbot (floating bubble, bottom-right) needs `GROQ_API_KEY` set in `backend/.env`. Without it, the chatbot returns a friendly "not configured" message but the rest of the site works fine.

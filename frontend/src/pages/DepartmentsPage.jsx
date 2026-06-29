@@ -4,6 +4,7 @@ import api from "../utils/axios";
 import PublicLayout from "../layouts/PublicLayout";
 import NeumorphicBox from "../components/ui/NeumorphicBox";
 import DoctorCard from "../components/ui/DoctorCard";
+import { useTranslation } from "react-i18next";
 import {
   Stethoscope,
   ArrowRight,
@@ -39,6 +40,7 @@ const getDeptIcon = (name = "") => {
 
 // ── Department list page ──────────────────────────────────────────────────────
 const DepartmentsList = () => {
+  const { t } = useTranslation();
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,18 +64,17 @@ const DepartmentsList = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-14">
           <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-3">
-            Specialties
+            {t('departmentsPage.tag')}
           </p>
-          <h1 className="text-4xl font-bold">Our Departments</h1>
+          <h1 className="text-4xl font-bold">{t('departmentsPage.title')}</h1>
           <p className="text-muted mt-4 max-w-xl mx-auto">
-            Explore all medical departments. Click any department to see
-            available doctors and book an appointment.
+            {t('departmentsPage.subtitle')}
           </p>
         </div>
 
         {departments.length === 0 ? (
           <NeumorphicBox className="p-16 text-center">
-            <p className="text-muted">No departments have been added yet.</p>
+            <p className="text-muted">{t('departmentsPage.noDepartments')}</p>
           </NeumorphicBox>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -90,7 +91,7 @@ const DepartmentsList = () => {
                     </p>
                   )}
                   <div className="mt-5 flex items-center gap-1.5 text-primary text-sm font-semibold">
-                    View doctors <ArrowRight size={15} />
+                    {t('departmentsPage.viewDoctors')} <ArrowRight size={15} />
                   </div>
                 </NeumorphicBox>
               </Link>
@@ -104,6 +105,7 @@ const DepartmentsList = () => {
 
 // ── Single department detail page ─────────────────────────────────────────────
 const DepartmentDetail = ({ id }) => {
+  const { t } = useTranslation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -134,7 +136,7 @@ const DepartmentDetail = ({ id }) => {
           to="/departments"
           className="inline-flex items-center gap-2 text-muted hover:text-primary text-sm font-medium mb-10 transition-colors"
         >
-          <ArrowLeft size={15} /> Back to Departments
+          <ArrowLeft size={15} /> {t('departmentsPage.backToDepartments')}
         </Link>
 
         {/* Header */}
@@ -151,8 +153,7 @@ const DepartmentDetail = ({ id }) => {
               <div className="flex items-center gap-2 mt-4 text-sm text-muted">
                 <Users size={15} className="text-primary" />
                 <span>
-                  {doctors.length} available doctor
-                  {doctors.length !== 1 ? "s" : ""}
+                  {doctors.length} {doctors.length !== 1 ? t('departmentsPage.availableDoctors') : t('departmentsPage.availableDoctor')}
                 </span>
               </div>
             </div>
@@ -164,21 +165,21 @@ const DepartmentDetail = ({ id }) => {
           <NeumorphicBox className="p-14 text-center">
             <Stethoscope className="mx-auto text-muted mb-4" size={36} />
             <p className="font-semibold">
-              No doctors currently available in this department
+              {t('departmentsPage.noDoctorsTitle')}
             </p>
             <p className="text-muted text-sm mt-2">
-              Please check back later or browse other departments.
+              {t('departmentsPage.noDoctorsText')}
             </p>
             <Link
               to="/doctors"
               className="nm-button-accent inline-block mt-6 text-sm py-2.5 px-8"
             >
-              Browse All Doctors
+              {t('departmentsPage.browseAllDoctors')}
             </Link>
           </NeumorphicBox>
         ) : (
           <>
-            <h2 className="text-xl font-bold mb-6">Available Doctors</h2>
+            <h2 className="text-xl font-bold mb-6">{t('departmentsPage.availableDoctorsHeading')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {doctors.map((doc) => (
                 <DoctorCard key={doc._id} doctor={doc} />

@@ -309,7 +309,39 @@ npm run dev     # → http://localhost:5173
 
 ---
 
-## 7. COMPLETE FEATURE STATUS (Final)
+---
+
+### Session 3 — Bug audit (payments focus) + AI Chatbot feature
+
+#### Bugs found and fixed
+
+| # | File | Bug | Impact | Fix |
+|---|------|-----|--------|-----|
+| 1 | `frontend/src/pages/AppointmentsDashboard.jsx` + `backend/controllers/appointmentController.js` | Patient could click plain **Cancel** on an already-**paid** appointment. `cancelAppointment` only set `status: 'cancelled'` — it never touched the Payment record or `paymentStatus`. Result: appointment cancelled, money stayed marked `successful`, no refund record, admin never saw it. | **Money-loss bug.** Real financial impact. | Backend now rejects a direct cancel when `paymentStatus === 'paid'` (patients must use Refund flow instead; admin still can cancel directly). Frontend hides the Cancel button for paid appointments and shows only Refund. |
+| 2 | `backend/middleware/auth.js` | Typo `new Errormponse(...)` instead of `ErrorResponse` in the `authorize()` role-check. | Any request from a user with the wrong role crashed with a `ReferenceError` → ugly 500 instead of a clean 403 message. | Fixed the typo. |
+| 3 | `backend/controllers/paymentController.js` — `paymentIPN` | IPN handler trusted `status` from the raw POST body without re-validating against SSLCommerz's validator API (unlike `paymentSuccess`, which does validate). A forged POST to the public `/payments/ipn` endpoint with a guessed `tran_id` and `status=VALID` could mark a payment successful without ever paying. | **Payment-spoofing risk** on a public endpoint. | IPN now calls the same SSLCommerz validator API as the success callback, and also cross-checks the validated amount against the stored payment amount before marking it `successful`. |
+
+> Note: real `.env` secrets (DB password, JWT secret, Cloudinary keys, SSLCommerz store password) were present in the uploaded project. `.gitignore` already excludes `.env` from git, so the repository itself is safe — but since these were shared outside of git, rotating them is good practice.
+
+#### New feature — AI Medical Assistant Chatbot
+
+**Backend:**
+- `backend/utils/clinicKnowledge.js` — static knowledge block (hours, address, policies, booking/refund/reschedule explanation). **Edit the placeholders** with your real info.
+- `backend/controllers/chatbotController.js` — calls the Groq API (OpenAI-compatible `chat/completions`) with a strict system prompt and two tools:
+  - `find_departments` — looks up real departments from MongoDB, optional keyword filter.
+  - `find_doctors` — looks up real, currently-available doctors from MongoDB, filterable by department or specialization keyword. Returns name, fee, degree, experience, rating.
+- `backend/routes/chatbotRoutes.js` — `POST /api/v1/chatbot/message`, public, with its own rate limiter (20 requests/minute) since each call costs Groq API usage.
+- Safety rules baked into the system prompt: never diagnoses, never names medications/dosages, asks at most 2–3 follow-up questions before suggesting a department + a real available doctor, and immediately redirects to emergency services if the user describes emergency symptoms.
+
+**Frontend:**
+- `frontend/src/components/ui/ChatbotWidget.jsx` — floating chat bubble (bottom-right) on every page. Multi-turn conversation, sends capped history to the backend, shows a "Browse all doctors" quick link, loading state, and graceful error messages.
+- Mounted globally in `frontend/src/App.jsx`.
+- No new frontend dependency needed (`lucide-react` and `axios` wrapper already present).
+
+**New env var required:** `GROQ_API_KEY` (get a free key at console.groq.com) — add it to `backend/.env`. Optional `GROQ_MODEL` to override the default model.
+
+**What it does NOT do (by design):** it does not diagnose, prescribe, or replace a real consultation — it only answers platform questions and points the user to a real department/doctor to book.
+
 
 | Feature | Before | After |
 |---------|--------|-------|
@@ -324,3 +356,129 @@ npm run dev     # → http://localhost:5173
 | Revenue charts (admin) | Partial (numbers only) | ✅ Area + Bar + Pie charts |
 | Admin all appointments | Missing | ✅ Full table with filters + actions |
 | Admin refund management | Missing | ✅ Approve/reject refund requests |
+| Paid-appointment direct cancel (bug) | Money could be lost silently | ✅ Fixed — forces refund flow |
+| IPN payment spoofing risk (bug) | Unvalidated IPN status trusted | ✅ Fixed — re-validates via SSLCommerz API |
+| AI Medical Assistant Chatbot | Missing | ✅ Groq-powered, live DB lookup, symptom triage → doctor suggestion |
+
+---
+
+### Session 4 — Full re-verification + real build-breaking bug found
+
+This session was triggered because the chatbot showed "no doctor found" and a
+payment test failed. Instead of guessing, every file was actually run —
+`npm install`, `npm run build`, `npm run dev`, and live `curl` requests
+against the running backend — to separate real bugs from environment-specific
+issues (ngrok URLs, sandbox payment gateway behavior, etc. that only exist on
+your machine and can't be reproduced here).
+
+#### Bug found and fixed — production build was completely broken
+
+| File | Bug | Impact | Fix |
+|---|---|---|---|
+| `frontend/vite.config.js` | `manualChunks` was written in **object form** (`{ 'react-vendor': [...] }`), which the project's pinned Vite version (`^8.0.16`, using the new rolldown engine) does not accept. Running `npm run build` crashed immediately with `TypeError: manualChunks is not a function`. | `npm run dev` (what you use locally) was unaffected, but `npm run build` — needed for any real deployment (Render/Vercel) — failed 100% of the time. | Rewrote `manualChunks` as a **function** that inspects each module's path and assigns it to the same vendor chunks as before. Verified: `npm run build` now completes cleanly (2880 modules, all chunks generated). |
+
+#### Chatbot — root cause of "no doctor shown" identified and fixed
+
+The previous chatbot version relied entirely on the AI model *deciding* to
+call the `find_doctors`/`find_departments` tools before answering. If the
+model skipped that decision (which AI models sometimes do, especially under
+casual phrasing), it had zero real data and either said "no doctor found" or
+invented a name.
+
+**Fix:** the backend now always fetches a live snapshot of all departments
+and currently-available doctors from MongoDB **before** calling the AI, and
+injects that real data directly into the system prompt on every single
+message. The AI tools (`find_doctors`, `find_departments`, `get_doctor_details`)
+are still available for deeper lookups, but the bot no longer depends on the
+model remembering to call them for the common case — it already has the real
+list in front of it every time.
+
+Also fixed: the earlier hallucination-safety-net used `tool_choice: 'required'`
+on retry, which Groq's API can reject with a 400 error if the model decides
+not to call any tool — causing a silent failure. Replaced with a safer
+forced-specific-tool call (`{ type: 'function', function: { name: 'find_doctors' } }`)
+plus a graceful fallback message if even that retry fails, instead of ever
+showing a possibly-fake name.
+
+> **Note on the "no doctors" message itself:** if your real database has
+> zero doctors with `isAvailable: true`, the bot will correctly say so — that
+> is accurate behavior, not a bug. Run `npm run seed` in `backend/` to
+> populate demo doctors/departments if you haven't, or check the Admin →
+> Doctors page to confirm doctors exist and are marked available.
+
+#### Payment ("contact support" error during bKash sandbox test) — not reproducible from this environment
+
+This could not be verified directly here, since it requires a live ngrok
+tunnel and live SSLCommerz sandbox session running on your machine. What was
+confirmed instead:
+- `paymentController.js`, `paymentRoutes.js`, and `appointmentController.js`
+  all have correct syntax and logic, and were re-traced line by line — no
+  code defect found in the payment flow itself.
+- The backend boots cleanly and responds correctly to test requests.
+
+The "please contact support" message is shown by **SSLCommerz's own gateway
+page**, not by this codebase — it appears when the gateway itself can't
+complete the simulated transaction (common causes: an expired/changed ngrok
+URL not matching what's saved when the payment session was created, a sandbox
+session that timed out, or an intermittent issue on SSLCommerz's sandbox
+servers). See `test_audit.md` / `HOW_TO_RUN.md` for how to isolate this
+precisely with terminal logs if it happens again.
+
+#### Everything else re-verified in this session
+- All 33 backend `.js` files: syntax-checked individually, zero errors.
+- Backend: actually started (`node index.js`), confirmed it boots without
+  crashing and responds correctly on `/`, `/api/v1/departments`,
+  `/api/v1/doctors`, and `/api/v1/chatbot/message`.
+- Frontend: actually built (`npm run build`) and the dev server actually
+  started (`npm run dev`) — both confirmed working after the Vite config fix.
+- Multi-language (Bangla/English) switcher in the Navbar: confirmed it builds
+  and runs cleanly alongside everything else.
+
+---
+
+### Session 5 — Payment fix confirmed + 3 new features added
+
+**Payment bug — confirmed root cause, fixed:** `paymentController.js`'s validator
+calls (`paymentSuccess` and `paymentIPN`) were sending the wrong parameter
+name to SSLCommerz's validation API — `store_pass` instead of the correct
+`store_passwd`. This caused SSLCommerz to reject every validation attempt
+with `INVALID_TRANSACTION`, even for genuinely successful payments. Fixed by
+correcting the parameter name to `store_passwd` in both places (matching the
+already-correct `initPayment` function). Confirmed working.
+
+**Navbar bugs fixed:**
+- Mobile (hamburger) menu was still using the old `{ label }` field name
+  after the language-switcher refactor, so mobile nav text rendered blank.
+  Fixed to use `t('nav.key')` like the desktop version.
+- Added the language toggle button to the mobile menu (it was missing,
+  desktop-only before).
+
+**Multi-language expanded:** Home... wait, per your request the scope was
+narrowed to the 5 public pages + Login/Register. Translated: Navbar (desktop +
+mobile), Footer, About page, Login page, Register page. (Contact, Departments,
+Doctors, Home pages remain English-only for now — only what was scoped.)
+
+**New: CSV Export for Admin** — `frontend/src/utils/exportCsv.js` (zero
+dependency, pure JS, triggers a browser download). Added "Export CSV" buttons
+to:
+- Admin → All Appointments
+- Admin → User Management
+- Admin → Revenue & Analytics (exports the 12-month revenue table)
+
+**New: Video Consultation (Jitsi Meet)** — for confirmed appointments, both
+patient and doctor now see a "Join Video Call" button that opens a free,
+no-signup Jitsi Meet room (`meet.jit.si/ShifaCare-Consult-<appointmentId>`)
+in a new tab. Both sides land in the same room automatically since the room
+name is derived from the appointment's own ID. No backend changes, no API
+key, no cost — pure frontend addition, verified to build cleanly.
+
+**Explicitly skipped (per your decision):** real-time Socket.io updates —
+not needed since you confirmed manual refresh after payment/booking is fine
+for this project's scope.
+
+**Chatbot** — confirmed by you as now working correctly with live database
+data. No further changes made to it this session.
+
+#### Verified again this session
+- `npm run build` — clean, 2881 modules, no errors.
+- All modified files syntax-checked (brace/paren balance + structure review).

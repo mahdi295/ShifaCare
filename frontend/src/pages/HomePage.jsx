@@ -6,6 +6,7 @@ import NeumorphicBox from "../components/ui/NeumorphicBox";
 import DoctorCard from "../components/ui/DoctorCard";
 import HeroSlider from "../components/ui/HeroSlider";
 import { DoctorCardSkeleton } from "../components/ui/SkeletonLoader";
+import { useTranslation } from "react-i18next";
 import {
   StaggerContainer,
   StaggerItem,
@@ -31,72 +32,8 @@ import {
   Phone,
 } from "lucide-react";
 
-const STATS = [
-  { icon: Users, value: "15,000+", label: "Patients Served" },
-  { icon: Award, value: "120+", label: "Expert Doctors" },
-  { icon: Calendar, value: "50,000+", label: "Appointments Done" },
-  { icon: Clock, value: "24/7", label: "Emergency Support" },
-];
-
-const SERVICES = [
-  {
-    icon: Heart,
-    title: "Cardiology",
-    desc: "Heart disease diagnosis, treatment & prevention by senior cardiologists.",
-  },
-  {
-    icon: Brain,
-    title: "Neurology",
-    desc: "Expert neurological care for brain, spine and nervous system disorders.",
-  },
-  {
-    icon: Baby,
-    title: "Pediatrics",
-    desc: "Compassionate child healthcare from newborn through adolescence.",
-  },
-  {
-    icon: Bone,
-    title: "Orthopedics",
-    desc: "Bone, joint and muscle care including minimally-invasive surgery.",
-  },
-  {
-    icon: Eye,
-    title: "Ophthalmology",
-    desc: "Comprehensive eye care and advanced vision correction treatments.",
-  },
-  {
-    icon: Stethoscope,
-    title: "General Medicine",
-    desc: "Primary healthcare, routine check-ups and chronic disease management.",
-  },
-];
-
-const FAQS = [
-  {
-    q: "How do I book an appointment?",
-    a: "Visit our Doctors page, choose a specialist, pick an available date and time slot, and confirm. You receive a serial number immediately.",
-  },
-  {
-    q: "What payment methods are accepted?",
-    a: "We accept bKash, Nagad, Rocket, Visa and MasterCard via SSLCommerz. You can also pay cash at reception.",
-  },
-  {
-    q: "Can I cancel or reschedule?",
-    a: "Yes. Log into your patient dashboard and cancel any pending appointment. Rescheduling requires cancelling and rebooking.",
-  },
-  {
-    q: "How do I get my prescription?",
-    a: "After your consultation the doctor issues a digital prescription. It appears in your dashboard and can be downloaded as a PDF.",
-  },
-  {
-    q: "Is my medical data secure?",
-    a: "All data is encrypted in transit and at rest. Only you, your doctor, and authorized hospital staff can access your records.",
-  },
-  {
-    q: "Do you offer emergency services?",
-    a: "Yes, our emergency department operates 24/7. For life-threatening emergencies please call 999 or come directly to the hospital.",
-  },
-];
+const STAT_ICONS = [Users, Award, Calendar, Clock];
+const SERVICE_ICONS = [Heart, Brain, Baby, Bone, Eye, Stethoscope];
 
 const TESTIMONIALS = [
   {
@@ -167,6 +104,7 @@ const FaqItem = ({ q, a }) => {
 };
 
 const TestimonialsCarousel = () => {
+  const { t } = useTranslation();
   const trackRef = useRef(null);
   const animRef = useRef(null);
   const posRef = useRef(0);
@@ -202,10 +140,10 @@ const TestimonialsCarousel = () => {
     <section className="py-16 bg-surface border-y border-border overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-10">
         <p className="text-primary text-xs font-semibold uppercase tracking-widest mb-2">
-          Patient Stories
+          {t('homePage.patientStoriesTag')}
         </p>
         <h2 className="text-2xl md:text-3xl font-bold text-heading">
-          What Our Patients Say
+          {t('homePage.patientStoriesTitle')}
         </h2>
       </div>
       <div className="overflow-hidden">
@@ -262,9 +200,15 @@ const TestimonialsCarousel = () => {
 };
 
 const HomePage = () => {
+  const { t } = useTranslation();
   const [featuredDoctors, setFeaturedDoctors] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
+
+  const stats = t('homePage.stats', { returnObjects: true });
+  const services = t('homePage.services', { returnObjects: true });
+  const heroFeatures = t('homePage.heroFeatures', { returnObjects: true });
+  const faqs = t('homePage.faqs', { returnObjects: true });
 
   useEffect(() => {
     Promise.all([api.get("/doctors?available=true"), api.get("/departments")])
@@ -290,31 +234,25 @@ const HomePage = () => {
             {/* Right: Text Content */}
             <div className="order-1 lg:order-2">
               <div className="inline-flex items-center gap-2 bg-primary-light text-primary rounded-full px-4 py-1.5 text-xs font-semibold mb-6">
-                <Activity size={12} /> Bangladesh's Leading Healthcare Platform
+                <Activity size={12} /> {t('homePage.badge')}
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-[56px] font-bold leading-tight text-heading">
-                Your Health, <span className="text-primary">Perfectly</span>{" "}
-                Managed
+                {t('homePage.heroTitle1')} <span className="text-primary">{t('homePage.heroTitleHighlight')}</span>{" "}
+                {t('homePage.heroTitle2')}
               </h1>
               <p className="mt-5 text-body text-lg leading-relaxed max-w-xl">
-                Book appointments with verified specialists, receive digital
-                prescriptions, and manage your entire healthcare journey — all
-                in one place.
+                {t('homePage.heroSubtitle')}
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to="/doctors" className="btn-primary py-3 px-7 text-base">
-                  Book Appointment <ArrowRight size={17} />
+                  {t('homePage.bookAppointment')} <ArrowRight size={17} />
                 </Link>
                 <Link to="/about" className="btn-outline py-3 px-7 text-base">
-                  Learn More
+                  {t('homePage.learnMore')}
                 </Link>
               </div>
               <div className="mt-8 flex flex-wrap gap-5">
-                {[
-                  "No waiting queues",
-                  "Digital prescriptions",
-                  "Secure payments",
-                ].map((f) => (
+                {heroFeatures.map((f) => (
                   <div
                     key={f}
                     className="flex items-center gap-2 text-sm text-muted"
@@ -335,20 +273,23 @@ const HomePage = () => {
       {/* ── STATS STRIP ───────────────────────────────────────────────────── */}
       <section className="px-6 py-4 border-y border-border bg-surface">
         <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 divide-x divide-border">
-          {STATS.map(({ icon: Icon, value, label }) => (
-            <div
-              key={label}
-              className="flex items-center gap-4 px-6 py-4 first:pl-0 last:pr-0"
-            >
-              <div className="w-10 h-10 rounded-lg bg-primary-light flex items-center justify-center shrink-0">
-                <Icon size={18} className="text-primary" />
+          {stats.map(({ value, label }, i) => {
+            const Icon = STAT_ICONS[i];
+            return (
+              <div
+                key={label}
+                className="flex items-center gap-4 px-6 py-4 first:pl-0 last:pr-0"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary-light flex items-center justify-center shrink-0">
+                  <Icon size={18} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-heading">{value}</p>
+                  <p className="text-xs text-muted">{label}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-bold text-heading">{value}</p>
-                <p className="text-xs text-muted">{label}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -357,38 +298,40 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-10">
             <p className="text-primary text-xs font-semibold uppercase tracking-widest mb-2">
-              What We Offer
+              {t('homePage.servicesTag')}
             </p>
             <h2 className="text-2xl md:text-3xl font-bold text-heading">
-              Comprehensive Medical Services
+              {t('homePage.servicesTitle')}
             </h2>
             <p className="text-muted mt-2 max-w-xl">
-              World-class specialists across every major medical discipline, all
-              bookable online.
+              {t('homePage.servicesSubtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SERVICES.map(({ icon: Icon, title, desc }) => (
-              <div
-                key={title}
-                className="bg-surface rounded-xl border border-border p-6 hover:border-primary/30 hover:shadow-card-md transition-all duration-200 group"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary-light flex items-center justify-center mb-4">
-                  <Icon size={20} className="text-primary" />
+            {services.map(({ title, desc }, i) => {
+              const Icon = SERVICE_ICONS[i];
+              return (
+                <div
+                  key={title}
+                  className="bg-surface rounded-xl border border-border p-6 hover:border-primary/30 hover:shadow-card-md transition-all duration-200 group"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary-light flex items-center justify-center mb-4">
+                    <Icon size={20} className="text-primary" />
+                  </div>
+                  <h3 className="text-base font-bold text-heading mb-1.5">
+                    {title}
+                  </h3>
+                  <p className="text-sm text-muted leading-relaxed">{desc}</p>
                 </div>
-                <h3 className="text-base font-bold text-heading mb-1.5">
-                  {title}
-                </h3>
-                <p className="text-sm text-muted leading-relaxed">{desc}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-8">
             <Link
               to="/departments"
               className="btn-outline text-sm inline-flex items-center gap-2"
             >
-              View All Departments <ArrowRight size={14} />
+              {t('homePage.viewAllDepartments')} <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -399,14 +342,13 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-10">
             <p className="text-primary text-xs font-semibold uppercase tracking-widest mb-2">
-              Meet Our Team
+              {t('homePage.teamTag')}
             </p>
             <h2 className="text-2xl md:text-3xl font-bold text-heading">
-              Featured Specialists
+              {t('homePage.featuredSpecialists')}
             </h2>
             <p className="text-muted mt-2 max-w-xl">
-              Handpicked doctors with exceptional expertise and patient
-              satisfaction records.
+              {t('homePage.featuredSubtitle')}
             </p>
           </div>
 
@@ -425,7 +367,7 @@ const HomePage = () => {
           ) : (
             <div className="bg-background rounded-xl p-10 text-center border border-border">
               <p className="text-muted">
-                No doctors available at the moment. Check back soon.
+                {t('homePage.noDoctorsAvailable')}
               </p>
             </div>
           )}
@@ -435,7 +377,7 @@ const HomePage = () => {
               to="/doctors"
               className="btn-primary text-sm inline-flex items-center gap-2"
             >
-              See All Doctors <ArrowRight size={14} />
+              {t('homePage.seeAllDoctors')} <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -447,10 +389,10 @@ const HomePage = () => {
           <div className="max-w-7xl mx-auto">
             <div className="mb-10">
               <p className="text-primary text-xs font-semibold uppercase tracking-widest mb-2">
-                Specialties
+                {t('homePage.specialtiesTag')}
               </p>
               <h2 className="text-2xl md:text-3xl font-bold text-heading">
-                Browse Departments
+                {t('homePage.browseDepartments')}
               </h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -472,7 +414,7 @@ const HomePage = () => {
                 to="/departments"
                 className="text-primary text-sm font-semibold hover:underline inline-flex items-center gap-1"
               >
-                View All <ArrowRight size={14} />
+                {t('homePage.viewAll')} <ArrowRight size={14} />
               </Link>
             </div>
           </div>
@@ -487,14 +429,14 @@ const HomePage = () => {
         <div className="max-w-2xl mx-auto">
           <div className="mb-10">
             <p className="text-primary text-xs font-semibold uppercase tracking-widest mb-2">
-              Got Questions?
+              {t('homePage.faqTag')}
             </p>
             <h2 className="text-2xl md:text-3xl font-bold text-heading">
-              Frequently Asked
+              {t('homePage.faqTitle')}
             </h2>
           </div>
           <div className="space-y-2">
-            {FAQS.map((faq) => (
+            {faqs.map((faq) => (
               <FaqItem key={faq.q} {...faq} />
             ))}
           </div>
@@ -508,24 +450,23 @@ const HomePage = () => {
             <Activity size={24} className="text-white" />
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-            Ready to Take Control of Your Health?
+            {t('homePage.ctaTitle')}
           </h2>
           <p className="text-white/70 mb-8 max-w-lg mx-auto">
-            Join thousands of patients managing their healthcare seamlessly.
-            Book your first appointment in under 2 minutes.
+            {t('homePage.ctaText')}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               to="/register"
               className="inline-flex items-center gap-2 bg-surface text-primary font-semibold px-7 py-3 rounded-lg hover:bg-surface/90 transition-colors text-sm"
             >
-              Create Free Account <ArrowRight size={16} />
+              {t('homePage.createFreeAccount')} <ArrowRight size={16} />
             </Link>
             <Link
               to="/doctors"
               className="inline-flex items-center gap-2 bg-surface/15 text-white font-semibold px-7 py-3 rounded-lg hover:bg-surface/25 transition-colors text-sm"
             >
-              Browse Doctors
+              {t('homePage.browseDoctors')}
             </Link>
           </div>
         </div>

@@ -5,9 +5,11 @@ import DoctorCard from '../components/ui/DoctorCard';
 import NeumorphicBox from '../components/ui/NeumorphicBox';
 import { DoctorCardSkeleton } from '../components/ui/SkeletonLoader';
 import { StaggerContainer, StaggerItem, HoverLift } from '../components/ui/PageTransition';
+import { useTranslation } from 'react-i18next';
 import { Search, Filter, Loader2, Stethoscope } from 'lucide-react';
 
 const DoctorsPage = () => {
+  const { t } = useTranslation();
   const [doctors,     setDoctors]     = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading,     setLoading]     = useState(true);
@@ -50,10 +52,10 @@ const DoctorsPage = () => {
 
           {/* Header */}
           <div className="text-center mb-14">
-            <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-3">Find a Specialist</p>
-            <h1 className="text-4xl font-bold">Our Doctors</h1>
+            <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-3">{t('doctorsPage.tag')}</p>
+            <h1 className="text-4xl font-bold">{t('doctorsPage.title')}</h1>
             <p className="text-muted mt-4 max-w-xl mx-auto">
-              Browse and book appointments with verified specialists across all departments.
+              {t('doctorsPage.subtitle')}
             </p>
           </div>
 
@@ -64,7 +66,7 @@ const DoctorsPage = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={17} />
               <input
                 type="text"
-                placeholder="Search by name or specialization..."
+                placeholder={t('doctorsPage.searchPlaceholder')}
                 className="nm-input w-full pl-11"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -79,7 +81,7 @@ const DoctorsPage = () => {
                 value={deptFilter}
                 onChange={(e) => setDeptFilter(e.target.value)}
               >
-                <option value="">All Departments</option>
+                <option value="">{t('doctorsPage.allDepartments')}</option>
                 {departments.map((d) => (
                   <option key={d._id} value={d._id}>{d.name}</option>
                 ))}
@@ -93,8 +95,8 @@ const DoctorsPage = () => {
                 value={availFilter}
                 onChange={(e) => setAvailFilter(e.target.value)}
               >
-                <option value="">All Availability</option>
-                <option value="true">Available Now</option>
+                <option value="">{t('doctorsPage.allAvailability')}</option>
+                <option value="true">{t('doctorsPage.availableNow')}</option>
               </select>
             </div>
           </div>
@@ -102,8 +104,8 @@ const DoctorsPage = () => {
           {/* Results count */}
           {!loading && (
             <p className="text-sm text-muted mb-6">
-              Showing <span className="font-semibold text-text">{filtered.length}</span> doctor{filtered.length !== 1 ? 's' : ''}
-              {search && <> matching "<span className="text-primary">{search}</span>"</>}
+              {t('doctorsPage.showing')} <span className="font-semibold text-text">{filtered.length}</span> {filtered.length !== 1 ? t('doctorsPage.doctorsPlural') : t('doctorsPage.doctor')}
+              {search && <> {t('doctorsPage.matching')} "<span className="text-primary">{search}</span>"</>}
             </p>
           )}
 
@@ -125,15 +127,15 @@ const DoctorsPage = () => {
           ) : (
             <NeumorphicBox className="p-16 text-center">
               <Stethoscope className="mx-auto text-muted mb-4" size={40} />
-              <p className="font-semibold text-lg">No doctors found</p>
+              <p className="font-semibold text-lg">{t('doctorsPage.noDoctorsFound')}</p>
               <p className="text-muted text-sm mt-2">
-                Try adjusting your search or filters.
+                {t('doctorsPage.tryAdjusting')}
               </p>
               <button
                 onClick={() => { setSearch(''); setDeptFilter(''); setAvailFilter(''); }}
                 className="nm-button text-sm text-primary mt-5 py-2.5 px-6"
               >
-                Clear Filters
+                {t('doctorsPage.clearFilters')}
               </button>
             </NeumorphicBox>
           )}

@@ -2,6 +2,7 @@ import asyncHandler from '../utils/asyncHandler.js';
 import ErrorResponse from '../utils/errorResponse.js';
 import Appointment from '../models/Appointment.js';
 import Doctor from '../models/Doctor.js';
+import Payment from '../models/Payment.js';
 
 // @desc    Book appointment
 // @route   POST /api/v1/appointments
@@ -90,7 +91,31 @@ export const getMyAppointments = asyncHandler(async (req, res, next) => {
     .populate('patient', 'name email phone avatar')
     .sort('-appointmentDate');
 
-  res.status(200).json({ success: true, count: appointments.length, data: appointments });
+  // FIX: the Appointment model only tracks paymentStatus as 'paid'/'unpaid'.
+  // Refund progress (refund_requested / refunded) lives on the separate
+  // Payment document, so the Appointments page had no way to show it —
+  // patient would submit a refund and see no visual change at all. Attach
+  // the related payment's refund status here so the frontend can show a
+  // proper "Refund Requested" / "Refunded" badge and hide the Refund button.
+  const appointmentIds = appointments.map((a) => a._id);
+  const payments = await Payment.find({
+    appointment: { $in: appointmentIds },
+    status: { $in: ['refund_requested', 'refunded'] },
+  }).select('appointment status refundReason');
+
+  const refundByAppointmentId = {};
+  payments.forEach((p) => { refundByAppointmentId[p.appointment.toString()] = p; });
+
+  const appointmentsWithRefundInfo = appointments.map((apt) => {
+    const refundPayment = refundByAppointmentId[apt._id.toString()];
+    return {
+      ...apt.toObject(),
+      refundStatus: refundPayment ? refundPayment.status : null,
+      refundReason: refundPayment ? refundPayment.refundReason : null,
+    };
+  });
+
+  res.status(200).json({ success: true, count: appointmentsWithRefundInfo.length, data: appointmentsWithRefundInfo });
 });
 
 // @desc    Get single appointment
@@ -153,6 +178,15 @@ export const cancelAppointment = asyncHandler(async (req, res, next) => {
 
   if (!isOwner && !isStaff) return next(new ErrorResponse('Not authorized to cancel this appointment', 403));
   if (appointment.status === 'completed') return next(new ErrorResponse('Cannot cancel a completed appointment', 400));
+
+  // FIX: block direct cancel of already-paid appointments for patients.
+  // Paid appointments must go through the refund flow so the Payment record
+  // is updated and the admin can see/approve it. Without this, a patient could
+  // cancel a paid appointment directly and the money would be stuck as
+  // "successful" with no refund trail.
+  if (appointment.paymentStatus === 'paid' && !isStaff) {
+    return next(new ErrorResponse('This appointment is already paid. Please request a refund instead of cancelling directly.', 400));
+  }
 
   appointment.status = 'cancelled';
   await appointment.save();

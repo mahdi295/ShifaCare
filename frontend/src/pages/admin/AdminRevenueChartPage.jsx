@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/axios';
+import { exportToCsv } from '../../utils/exportCsv';
 import NeumorphicBox from '../../components/ui/NeumorphicBox';
 import PageTransition from '../../components/ui/PageTransition';
-import { TrendingUp, DollarSign, Loader2, AlertCircle, BarChart2 } from 'lucide-react';
+import { TrendingUp, DollarSign, Loader2, AlertCircle, BarChart2, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -63,9 +64,28 @@ const AdminRevenueChartPage = () => {
   return (
     <PageTransition>
       <div className="space-y-6">
-        <div>
-          <h3 className="text-xl font-bold">Revenue & Analytics</h3>
-          <p className="text-muted text-sm mt-0.5">Financial insights and appointment metrics</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-xl font-bold">Revenue & Analytics</h3>
+            <p className="text-muted text-sm mt-0.5">Financial insights and appointment metrics</p>
+          </div>
+          <button
+            onClick={() => {
+              exportToCsv(
+                `revenue_${new Date().toISOString().slice(0, 10)}.csv`,
+                [
+                  { key: 'name', label: 'Month' },
+                  { key: 'revenue', label: 'Revenue (BDT)' },
+                  { key: 'appointments', label: 'Appointments' },
+                ],
+                revenueChart
+              );
+              toast.success('CSV exported');
+            }}
+            className="nm-button flex items-center gap-2 text-sm text-muted hover:text-primary px-4 py-2"
+          >
+            <Download size={15} /> Export CSV
+          </button>
         </div>
 
         {/* Summary strip */}

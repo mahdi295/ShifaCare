@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Loader2, Mail, Lock, Eye, EyeOff, ArrowLeft, Activity } from 'lucide-react';
 
 const loginSchema = z.object({
@@ -14,9 +15,11 @@ const loginSchema = z.object({
 const LoginPage = () => {
   const { login }  = useAuth();
   const navigate   = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw]   = useState(false);
   const [error, setError]     = useState('');
+  const features = t('auth.loginFeatures', { returnObjects: true });
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(loginSchema),
@@ -43,18 +46,13 @@ const LoginPage = () => {
         </div>
         <div>
           <h2 className="text-3xl font-bold text-white leading-snug mb-4">
-            Healthcare made<br />simple & accessible
+            {t('auth.loginHeroTitle1')}<br />{t('auth.loginHeroTitle2')}
           </h2>
           <p className="text-white/70 text-sm leading-relaxed">
-            Book appointments, access digital prescriptions, and manage your entire
-            healthcare journey in one place.
+            {t('auth.loginHeroText')}
           </p>
           <div className="mt-10 space-y-4">
-            {[
-              '120+ verified specialist doctors',
-              'Digital prescriptions & records',
-              'Secure online payments (bKash, Nagad)',
-            ].map((f) => (
+            {features.map((f) => (
               <div key={f} className="flex items-center gap-3 text-sm text-white/80">
                 <div className="w-5 h-5 rounded-full bg-surface/20 flex items-center justify-center shrink-0">
                   <svg viewBox="0 0 10 10" className="w-3 h-3 fill-white"><path d="M8.5 2L4 7.5 1.5 5"/><path d="M1.5 5l2.5 2.5L8.5 2" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -71,7 +69,7 @@ const LoginPage = () => {
       <div className="flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
         <div className="w-full max-w-sm mx-auto">
           <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary transition-colors mb-8">
-            <ArrowLeft size={14} /> Back to home
+            <ArrowLeft size={14} /> {t('auth.backToHome')}
           </Link>
 
           {/* Mobile brand */}
@@ -82,8 +80,8 @@ const LoginPage = () => {
             <span className="font-bold text-lg text-heading">ShifaCare</span>
           </div>
 
-          <h1 className="text-2xl font-bold text-heading mb-1">Welcome back</h1>
-          <p className="text-muted text-sm mb-8">Sign in to your account to continue</p>
+          <h1 className="text-2xl font-bold text-heading mb-1">{t('auth.welcomeBack')}</h1>
+          <p className="text-muted text-sm mb-8">{t('auth.signInSubtitle')}</p>
 
           {error && (
             <div className="mb-5 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
@@ -93,7 +91,7 @@ const LoginPage = () => {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-body mb-1.5">Email address</label>
+              <label className="block text-sm font-medium text-body mb-1.5">{t('auth.emailAddress')}</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" size={15} />
                 <input
@@ -109,9 +107,9 @@ const LoginPage = () => {
 
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-sm font-medium text-body">Password</label>
+                <label className="block text-sm font-medium text-body">{t('auth.password')}</label>
                 <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-                  Forgot password?
+                  {t('auth.forgotPassword')}
                 </Link>
               </div>
               <div className="relative">
@@ -139,14 +137,14 @@ const LoginPage = () => {
               disabled={loading}
               className="btn-primary w-full py-2.5 mt-2"
             >
-              {loading ? <Loader2 className="animate-spin" size={18} /> : 'Sign In'}
+              {loading ? <Loader2 className="animate-spin" size={18} /> : t('auth.signInButton')}
             </button>
           </form>
 
           <p className="text-sm text-muted text-center mt-6">
-            Don't have an account?{' '}
+            {t('auth.noAccount')}{' '}
             <Link to="/register" className="text-primary font-semibold hover:underline">
-              Register
+              {t('auth.registerLink')}
             </Link>
           </p>
         </div>

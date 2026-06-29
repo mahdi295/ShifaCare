@@ -9,6 +9,7 @@
 ./backend/controllers/adminController.js
 ./backend/controllers/appointmentController.js
 ./backend/controllers/authController.js
+./backend/controllers/chatbotController.js
 ./backend/controllers/departmentController.js
 ./backend/controllers/doctorController.js
 ./backend/controllers/paymentController.js
@@ -33,6 +34,7 @@
 ./backend/routes/adminRoutes.js
 ./backend/routes/appointmentRoutes.js
 ./backend/routes/authRoutes.js
+./backend/routes/chatbotRoutes.js
 ./backend/routes/departmentRoutes.js
 ./backend/routes/doctorRoutes.js
 ./backend/routes/paymentRoutes.js
@@ -40,6 +42,7 @@
 ./backend/seed.js
 ./backend/utils
 ./backend/utils/asyncHandler.js
+./backend/utils/clinicKnowledge.js
 ./backend/utils/errorResponse.js
 ./backend/utils/slotGenerator.js
 ./env.example
@@ -68,6 +71,7 @@
 ./frontend/src/components/PrescriptionForm.jsx
 ./frontend/src/components/ProtectedRoute.jsx
 ./frontend/src/components/ui
+./frontend/src/components/ui/ChatbotWidget.jsx
 ./frontend/src/components/ui/DoctorCard.jsx
 ./frontend/src/components/ui/HeroSlider.jsx
 ./frontend/src/components/ui/NeumorphicBox.jsx

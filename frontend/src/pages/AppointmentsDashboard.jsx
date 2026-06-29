@@ -5,7 +5,7 @@ import NeumorphicBox from '../components/ui/NeumorphicBox';
 import {
   Calendar, Clock, CheckCircle, XCircle, Loader2, User,
   CreditCard, AlertCircle, RefreshCw, FileText, Printer,
-  RotateCcw, X,
+  RotateCcw, X, Video,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -357,6 +357,14 @@ const AppointmentsDashboard = () => {
     }
   };
 
+  // Simple, free video consultation room — no signup, no API key needed.
+  // Both patient and doctor open the exact same room because it's built
+  // from the appointment's own id, so it's always unique per appointment.
+  const joinVideoCall = (appointmentId) => {
+    const roomName = `ShifaCare-Consult-${appointmentId}`;
+    window.open(`https://meet.jit.si/${roomName}`, '_blank', 'noopener,noreferrer');
+  };
+
   const handlePayment = async (appointmentId) => {
     setPayingId(appointmentId);
     try {
@@ -491,6 +499,20 @@ const AppointmentsDashboard = () => {
                       </span>
                     ) : null}
 
+                    {/* Refund status badge — shows the patient/admin the real
+                        state of a refund instead of leaving the card looking
+                        unchanged after a refund is requested. */}
+                    {apt.refundStatus === 'refund_requested' && (
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-md text-orange-600 bg-orange-50 border border-orange-200 flex items-center gap-1">
+                        <RotateCcw size={11} /> Refund Requested
+                      </span>
+                    )}
+                    {apt.refundStatus === 'refunded' && (
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-md text-purple-600 bg-purple-50 border border-purple-200 flex items-center gap-1">
+                        <RotateCcw size={11} /> Refunded
+                      </span>
+                    )}
+
                     {/* Patient: pay */}
                     {user?.role === 'patient' && apt.status !== 'cancelled' && apt.paymentStatus === 'unpaid' && (
                       <button
@@ -514,8 +536,18 @@ const AppointmentsDashboard = () => {
                       </button>
                     )}
 
-                    {/* Patient: cancel */}
-                    {user?.role === 'patient' && ['pending', 'confirmed'].includes(apt.status) && (
+                    {/* Patient: join video call (confirmed appointments only) */}
+                    {user?.role === 'patient' && apt.status === 'confirmed' && (
+                      <button
+                        onClick={() => joinVideoCall(apt._id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition-colors"
+                      >
+                        <Video size={12} /> Join Video Call
+                      </button>
+                    )}
+
+                    {/* Patient: cancel (only when NOT paid — paid appts must use Refund flow) */}
+                    {user?.role === 'patient' && ['pending', 'confirmed'].includes(apt.status) && apt.paymentStatus !== 'paid' && (
                       <button
                         onClick={() => handleCancel(apt._id)}
                         className="px-3 py-1.5 rounded-lg text-red-500 text-xs font-medium border border-red-200 hover:bg-red-50 transition-colors"
@@ -534,8 +566,8 @@ const AppointmentsDashboard = () => {
                       </button>
                     )}
 
-                    {/* Patient: refund for paid, not completed */}
-                    {user?.role === 'patient' && apt.paymentStatus === 'paid' && apt.status !== 'completed' && apt.status !== 'cancelled' && (
+                    {/* Patient: refund for paid, not completed, not already requested/refunded */}
+                    {user?.role === 'patient' && apt.paymentStatus === 'paid' && apt.status !== 'completed' && apt.status !== 'cancelled' && !apt.refundStatus && (
                       <button
                         onClick={() => setRefundFor(apt)}
                         className="px-3 py-1.5 rounded-lg text-red-500 text-xs font-medium border border-red-200 hover:bg-red-50 transition-colors"
@@ -561,6 +593,16 @@ const AppointmentsDashboard = () => {
                         className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors"
                       >
                         Issue Prescription
+                      </button>
+                    )}
+
+                    {/* Doctor: join video call */}
+                    {user?.role === 'doctor' && apt.status === 'confirmed' && (
+                      <button
+                        onClick={() => joinVideoCall(apt._id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition-colors"
+                      >
+                        <Video size={12} /> Join Video Call
                       </button>
                     )}
 

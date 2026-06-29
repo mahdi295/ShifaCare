@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, Activity, ChevronRight, LayoutDashboard, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Menu, X, Activity, ChevronRight, LayoutDashboard, LogOut, Languages } from 'lucide-react';
 
 const NAV_LINKS = [
-  { label: 'Home',        path: '/' },
-  { label: 'Doctors',     path: '/doctors' },
-  { label: 'Departments', path: '/departments' },
-  { label: 'About',       path: '/about' },
-  { label: 'Contact',     path: '/contact' },
+  { key: 'home',        path: '/' },
+  { key: 'doctors',     path: '/doctors' },
+  { key: 'departments', path: '/departments' },
+  { key: 'about',       path: '/about' },
+  { key: 'contact',     path: '/contact' },
 ];
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [open,    setOpen]    = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -29,6 +31,12 @@ const Navbar = () => {
   const handleLogout = async () => { await logout(); navigate('/'); };
   const isActive = (path) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+
+  const toggleLanguage = () => {
+    const next = i18n.language === 'bn' ? 'en' : 'bn';
+    i18n.changeLanguage(next);
+    localStorage.setItem('shifacare_lang', next);
+  };
 
   return (
     <>
@@ -47,7 +55,7 @@ const Navbar = () => {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-0.5">
-            {NAV_LINKS.map(({ label, path }) => (
+            {NAV_LINKS.map(({ key, path }) => (
               <Link
                 key={path}
                 to={path}
@@ -57,30 +65,38 @@ const Navbar = () => {
                     : 'text-muted hover:text-body hover:bg-background'
                 }`}
               >
-                {label}
+                {t(`nav.${key}`)}
               </Link>
             ))}
           </div>
 
           {/* Desktop auth */}
           <div className="hidden md:flex items-center gap-2">
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-muted hover:text-body hover:bg-background transition-colors"
+              aria-label="Switch language"
+              title="Switch language"
+            >
+              <Languages size={15} /> {i18n.language === 'bn' ? 'বাং' : 'EN'}
+            </button>
             {isAuthenticated ? (
               <>
                 <Link to="/dashboard" className="btn-outline py-2 px-4 text-sm flex items-center gap-1.5">
-                  <LayoutDashboard size={15} /> Dashboard
+                  <LayoutDashboard size={15} /> {t('nav.dashboard')}
                 </Link>
                 <button
                   onClick={handleLogout}
                   className="btn-ghost py-2 px-3 text-sm text-danger hover:bg-red-50"
                 >
-                  Logout
+                  {t('nav.logout')}
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="btn-outline py-2 px-4 text-sm">Sign In</Link>
+                <Link to="/login" className="btn-outline py-2 px-4 text-sm">{t('nav.signIn')}</Link>
                 <Link to="/register" className="btn-primary py-2 px-4 text-sm flex items-center gap-1.5">
-                  Get Started <ChevronRight size={14} />
+                  {t('nav.getStarted')} <ChevronRight size={14} />
                 </Link>
               </>
             )}
@@ -100,7 +116,7 @@ const Navbar = () => {
         {open && (
           <div className="md:hidden border-t border-border bg-surface">
             <div className="px-4 py-3 space-y-0.5">
-              {NAV_LINKS.map(({ label, path }) => (
+              {NAV_LINKS.map(({ key, path }) => (
                 <Link
                   key={path}
                   to={path}
@@ -110,23 +126,29 @@ const Navbar = () => {
                       : 'text-muted hover:text-body hover:bg-background'
                   }`}
                 >
-                  {label}
+                  {t(`nav.${key}`)}
                 </Link>
               ))}
+              <button
+                onClick={toggleLanguage}
+                className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-muted hover:text-body hover:bg-background transition-colors"
+              >
+                <Languages size={15} /> {i18n.language === 'bn' ? 'English এ যান' : 'বাংলায় দেখুন'}
+              </button>
               <div className="pt-2 border-t border-border mt-2 space-y-1.5">
                 {isAuthenticated ? (
                   <>
                     <Link to="/dashboard" className="flex w-full btn-primary justify-center py-2.5 text-sm">
-                      Dashboard
+                      {t('nav.dashboard')}
                     </Link>
                     <button onClick={handleLogout} className="w-full text-center text-sm text-danger py-2 hover:bg-red-50 rounded-lg transition-colors">
-                      Logout
+                      {t('nav.logout')}
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link to="/login"    className="flex w-full btn-outline justify-center py-2.5 text-sm">Sign In</Link>
-                    <Link to="/register" className="flex w-full btn-primary justify-center py-2.5 text-sm">Get Started</Link>
+                    <Link to="/login"    className="flex w-full btn-outline justify-center py-2.5 text-sm">{t('nav.signIn')}</Link>
+                    <Link to="/register" className="flex w-full btn-primary justify-center py-2.5 text-sm">{t('nav.getStarted')}</Link>
                   </>
                 )}
               </div>

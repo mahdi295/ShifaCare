@@ -20,6 +20,7 @@ import appointments  from './routes/appointmentRoutes.js';
 import prescriptions from './routes/prescriptionRoutes.js';
 import payments      from './routes/paymentRoutes.js';
 import admin         from './routes/adminRoutes.js';
+import chatbot        from './routes/chatbotRoutes.js';
 
 const app = express();
 
@@ -74,6 +75,7 @@ app.use('/api/v1/appointments',  appointments);
 app.use('/api/v1/prescriptions', prescriptions);
 app.use('/api/v1/payments',      payments);
 app.use('/api/v1/admin',         admin);
+app.use('/api/v1/chatbot',       chatbot);
 
 app.get('/', (req, res) => res.json({ success: true, message: 'ShifaCare API running' }));
 app.use(errorHandler);

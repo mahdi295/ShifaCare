@@ -34,6 +34,7 @@ import AdminRefundsPage       from './pages/admin/AdminRefundsPage';
 // Layout + guards
 import DashboardLayout from './layouts/DashboardLayout';
 import ProtectedRoute  from './components/ProtectedRoute';
+import ChatbotWidget    from './components/ui/ChatbotWidget';
 
 const ErrorPage = ({ code, message }) => (
   <div className="min-h-screen bg-background flex items-center justify-center p-6">
@@ -49,6 +50,7 @@ const ErrorPage = ({ code, message }) => (
 function App() {
   return (
     <AuthProvider>
+      <ChatbotWidget />
       <Routes>
         {/* Public */}
         <Route path="/"                element={<HomePage />} />

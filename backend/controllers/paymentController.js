@@ -134,7 +134,7 @@ export const paymentSuccess = asyncHandler(async (req, res, next) => {
         params: {
           val_id,
           store_id:   process.env.SSL_STORE_ID,
-          store_pass: process.env.SSL_STORE_PASS,
+          store_passwd: process.env.SSL_STORE_PASS,
           format:     'json',
         },
       }
@@ -191,12 +191,53 @@ export const paymentIPN = asyncHandler(async (req, res) => {
   const payment = await Payment.findOne({ transactionId: tran_id });
   if (!payment || payment.status === 'successful') return res.status(200).json({ success: true });
 
+  // FIX: don't trust the raw IPN body status blindly — anyone can POST to this
+  // public endpoint with a fake tran_id + status=VALID. Re-validate val_id against
+  // SSLCommerz's own validator API (same check paymentSuccess does) before marking paid.
   if (status === 'VALID' || status === 'VALIDATED') {
+    if (!val_id) {
+      console.error(`[IPN] Missing val_id for tran_id: ${tran_id}, ignoring.`);
+      return res.status(200).json({ success: true });
+    }
+
+    let validationRes;
+    try {
+      validationRes = await axios.get(
+        `${SSL_BASE()}/validator/api/validationserverAPI.php`,
+        {
+          params: {
+            val_id,
+            store_id:   process.env.SSL_STORE_ID,
+            store_passwd: process.env.SSL_STORE_PASS,
+            format:     'json',
+          },
+        }
+      );
+    } catch (err) {
+      console.error('[IPN] SSLCommerz validation request failed:', err.message);
+      return res.status(200).json({ success: true });
+    }
+
+    const validationStatus = validationRes.data?.status;
+    if (validationStatus !== 'VALID' && validationStatus !== 'VALIDATED') {
+      console.error(`[IPN] Validator rejected tran_id ${tran_id}, status: ${validationStatus}`);
+      return res.status(200).json({ success: true });
+    }
+
+    // Also confirm the validated amount/currency matches what we expect
+    const expectedAmount = Number(payment.amount);
+    const validatedAmount = Number(validationRes.data?.amount);
+    if (!Number.isNaN(validatedAmount) && Math.abs(validatedAmount - expectedAmount) > 0.01) {
+      console.error(`[IPN] Amount mismatch for tran_id ${tran_id}: expected ${expectedAmount}, got ${validatedAmount}`);
+      return res.status(200).json({ success: true });
+    }
+
     payment.status = 'successful';
     payment.method = req.body?.card_type || 'online';
     payment.paidAt = Date.now();
     await payment.save();
     await Appointment.findByIdAndUpdate(payment.appointment, { paymentStatus: 'paid' });
+    console.log(`[IPN] ${tran_id} confirmed and marked successful.`);
   } else if (status === 'FAILED') {
     await Payment.findOneAndUpdate({ transactionId: tran_id }, { status: 'failed' });
   }

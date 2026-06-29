@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import NeumorphicBox from '../components/ui/NeumorphicBox';
 import { Loader2, ArrowLeft, Eye, EyeOff, User, Mail, Lock } from 'lucide-react';
 
@@ -20,6 +21,7 @@ const registerSchema = z.object({
 const RegisterPage = () => {
   const { register: signup } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [showPw, setShowPw] = React.useState(false);
   const [showCpw, setShowCpw] = React.useState(false);
@@ -48,19 +50,19 @@ const RegisterPage = () => {
 
         <div className="mb-6">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted hover:text-primary transition-colors nm-button py-2 px-4">
-            <ArrowLeft size={15} /> Back to Home
+            <ArrowLeft size={15} /> {t('auth.backToHome')}
           </Link>
         </div>
 
       <NeumorphicBox className="p-8 md:p-10">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-primary">Create Account</h1>
-          <p className="text-muted text-sm mt-1">Patient registration — free & instant</p>
+          <h1 className="text-3xl font-bold text-primary">{t('auth.createAccount')}</h1>
+          <p className="text-muted text-sm mt-1">{t('auth.registerSubtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 px-1">Full Name</label>
+            <label className="block text-sm font-medium mb-2 px-1">{t('auth.fullName')}</label>
             <div className="relative">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={16} />
               <input {...register('name')} type="text" className="nm-input w-full pl-11" placeholder="Your full name" autoComplete="name" />
@@ -69,7 +71,7 @@ const RegisterPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 px-1">Email Address</label>
+            <label className="block text-sm font-medium mb-2 px-1">{t('auth.emailAddress')}</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={16} />
               <input {...register('email')} type="email" className="nm-input w-full pl-11" placeholder="name@example.com" autoComplete="email" />
@@ -78,7 +80,7 @@ const RegisterPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 px-1">Password</label>
+            <label className="block text-sm font-medium mb-2 px-1">{t('auth.password')}</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={16} />
               <input
@@ -99,7 +101,7 @@ const RegisterPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 px-1">Confirm Password</label>
+            <label className="block text-sm font-medium mb-2 px-1">{t('auth.confirmPassword')}</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={16} />
               <input
@@ -122,15 +124,15 @@ const RegisterPage = () => {
             disabled={isSubmitting}
             className="nm-button-accent w-full flex items-center justify-center gap-2 mt-4"
           >
-            {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : 'Create Account'}
+            {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : t('auth.registerButton')}
           </button>
         </form>
 
         <div className="mt-8 text-center">
           <p className="text-sm text-muted">
-            Already have an account?{' '}
+            {t('auth.haveAccount')}{' '}
             <Link to="/login" className="text-primary font-semibold hover:underline">
-              Sign In
+              {t('auth.loginLink')}
             </Link>
           </p>
         </div>

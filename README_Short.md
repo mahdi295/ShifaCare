@@ -13,6 +13,7 @@ A full-stack hospital management platform built with React + Express + MongoDB.
 - Download/print **payment receipts**
 - **Request refunds** for paid appointments (admin-reviewed)
 - View prescriptions issued by doctors
+- **AI Assistant chatbot** — ask platform questions, describe symptoms, get a department/doctor suggestion (not a diagnosis)
 
 ### Doctor
 - View and manage personal appointments (confirm, complete)
@@ -39,6 +40,7 @@ A full-stack hospital management platform built with React + Express + MongoDB.
 | Payments | SSLCommerz |
 | Images | Cloudinary |
 | Email | Nodemailer (SMTP) |
+| AI Chatbot | Groq API (Llama 3.3 70B) |
 
 ## Quick Start
 

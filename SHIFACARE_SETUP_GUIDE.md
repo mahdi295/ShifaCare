@@ -45,7 +45,12 @@ CLOUDINARY_API_SECRET=your_cloudinary_secret
 SSL_STORE_ID=your_ssl_store_id
 SSL_STORE_PASS=your_ssl_store_password
 SSL_IS_LIVE=false
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=llama-3.3-70b-versatile
 ```
+
+> Get a free Groq API key at https://console.groq.com/keys — needed for the AI chatbot.
+> Never commit this key or paste it in chat; if it leaks, revoke and regenerate it immediately.
 
 ### Frontend env file (optional)
 

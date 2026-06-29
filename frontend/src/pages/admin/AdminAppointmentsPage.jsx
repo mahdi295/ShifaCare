@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../utils/axios';
+import { exportToCsv } from '../../utils/exportCsv';
 import NeumorphicBox from '../../components/ui/NeumorphicBox';
 import PageTransition from '../../components/ui/PageTransition';
 import {
   Calendar, Search, Filter, Loader2, AlertCircle, User,
-  Stethoscope, Clock, CheckCircle, XCircle, RefreshCw,
+  Stethoscope, Clock, CheckCircle, XCircle, RefreshCw, Download,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -76,6 +77,33 @@ const AdminAppointmentsPage = () => {
     }
   };
 
+  const handleExportCsv = () => {
+    if (appointments.length === 0) {
+      toast.error('Nothing to export');
+      return;
+    }
+    exportToCsv(
+      `appointments_${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        { key: 'patient.name', label: 'Patient Name' },
+        { key: 'patient.email', label: 'Patient Email' },
+        { key: 'doctor.user.name', label: 'Doctor Name' },
+        { key: 'appointmentDate', label: 'Date' },
+        { key: 'slot', label: 'Slot' },
+        { key: 'serialNumber', label: 'Serial #' },
+        { key: 'fees', label: 'Fee (BDT)' },
+        { key: 'paymentStatus', label: 'Payment Status' },
+        { key: 'status', label: 'Appointment Status' },
+        { key: 'symptoms', label: 'Symptoms' },
+      ],
+      appointments.map((apt) => ({
+        ...apt,
+        appointmentDate: new Date(apt.appointmentDate).toLocaleDateString('en-GB'),
+      }))
+    );
+    toast.success('CSV exported');
+  };
+
   return (
     <PageTransition>
       <div className="space-y-6">
@@ -87,12 +115,20 @@ const AdminAppointmentsPage = () => {
               {loading ? '…' : `${appointments.length} appointment${appointments.length !== 1 ? 's' : ''}`} found
             </p>
           </div>
-          <button
-            onClick={fetchAppointments}
-            className="nm-button flex items-center gap-2 text-sm text-muted hover:text-primary px-4 py-2"
-          >
-            <RefreshCw size={15} /> Refresh
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleExportCsv}
+              className="nm-button flex items-center gap-2 text-sm text-muted hover:text-primary px-4 py-2"
+            >
+              <Download size={15} /> Export CSV
+            </button>
+            <button
+              onClick={fetchAppointments}
+              className="nm-button flex items-center gap-2 text-sm text-muted hover:text-primary px-4 py-2"
+            >
+              <RefreshCw size={15} /> Refresh
+            </button>
+          </div>
         </div>
 
         {/* Filters */}

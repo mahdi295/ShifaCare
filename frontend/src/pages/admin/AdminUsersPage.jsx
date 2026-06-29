@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/axios';
+import { exportToCsv } from '../../utils/exportCsv';
 import NeumorphicBox from '../../components/ui/NeumorphicBox';
 import PageTransition from '../../components/ui/PageTransition';
-import { Users, Search, Loader2, CheckCircle, XCircle, Shield } from 'lucide-react';
+import { Users, Search, Loader2, CheckCircle, XCircle, Shield, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ROLE_STYLE = {
@@ -52,9 +53,32 @@ const AdminUsersPage = () => {
       <div className="space-y-6">
 
         {/* Header */}
-        <div>
-          <h3 className="text-xl font-bold">User Management</h3>
-          <p className="text-muted text-sm mt-1">{users.length} users shown</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-xl font-bold">User Management</h3>
+            <p className="text-muted text-sm mt-1">{users.length} users shown</p>
+          </div>
+          <button
+            onClick={() => {
+              if (users.length === 0) { toast.error('Nothing to export'); return; }
+              exportToCsv(
+                `users_${new Date().toISOString().slice(0, 10)}.csv`,
+                [
+                  { key: 'name', label: 'Name' },
+                  { key: 'email', label: 'Email' },
+                  { key: 'phone', label: 'Phone' },
+                  { key: 'role', label: 'Role' },
+                  { key: 'isActive', label: 'Active' },
+                  { key: 'createdAt', label: 'Joined' },
+                ],
+                users.map((u) => ({ ...u, createdAt: new Date(u.createdAt).toLocaleDateString('en-GB') }))
+              );
+              toast.success('CSV exported');
+            }}
+            className="nm-button flex items-center gap-2 text-sm text-muted hover:text-primary px-4 py-2"
+          >
+            <Download size={15} /> Export CSV
+          </button>
         </div>
 
         {/* Filters */}

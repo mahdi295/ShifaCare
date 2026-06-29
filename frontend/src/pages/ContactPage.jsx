@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PublicLayout from '../layouts/PublicLayout';
 import NeumorphicBox from '../components/ui/NeumorphicBox';
+import { useTranslation } from 'react-i18next';
 import {
   Phone, Mail, MapPin, Clock, Send, Loader2, CheckCircle2,
 } from 'lucide-react';
@@ -17,36 +18,13 @@ const schema = z.object({
   message: z.string().min(20, 'Message must be at least 20 characters'),
 });
 
-const INFO_CARDS = [
-  {
-    icon: Phone,
-    title: 'Phone',
-    lines: ['+880 1234-567890', '+880 9876-543210'],
-    sub: 'Mon–Sat, 8 AM – 8 PM',
-  },
-  {
-    icon: Mail,
-    title: 'Email',
-    lines: ['care@shifacare.health', 'support@shifacare.health'],
-    sub: 'We reply within 24 hours',
-  },
-  {
-    icon: MapPin,
-    title: 'Address',
-    lines: ['Chandgaon, Chattogram', 'Bangladesh'],
-    sub: 'Main Campus',
-  },
-  {
-    icon: Clock,
-    title: 'Working Hours',
-    lines: ['Sat – Thu: 8 AM – 10 PM', 'Fri: 2 PM – 10 PM'],
-    sub: 'Emergency: 24/7',
-  },
-];
+const INFO_ICONS = [Phone, Mail, MapPin, Clock];
 
 const ContactPage = () => {
+  const { t } = useTranslation();
   const [submitted, setSubmitted] = useState(false);
   const [loading,   setLoading]   = useState(false);
+  const infoCards = t('contactPage.infoCards', { returnObjects: true });
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: zodResolver(schema),
@@ -67,29 +45,31 @@ const ContactPage = () => {
 
       {/* Header */}
       <section className="px-6 py-20 text-center">
-        <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-3">Get in Touch</p>
-        <h1 className="text-4xl md:text-5xl font-bold">Contact Us</h1>
+        <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-3">{t('contactPage.tag')}</p>
+        <h1 className="text-4xl md:text-5xl font-bold">{t('contactPage.title')}</h1>
         <p className="text-muted mt-4 max-w-xl mx-auto">
-          Have a question, need help with your appointment, or want to provide feedback?
-          We're here to help.
+          {t('contactPage.subtitle')}
         </p>
       </section>
 
       {/* Info cards */}
       <section className="px-6 pb-14">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {INFO_CARDS.map(({ icon: Icon, title, lines, sub }) => (
-            <NeumorphicBox key={title} className="p-6 text-center">
-              <div className="w-12 h-12 bg-background rounded-lg border border-border flex items-center justify-center mx-auto mb-4">
-                <Icon size={20} className="text-primary" />
-              </div>
-              <h4 className="font-bold text-sm mb-2">{title}</h4>
-              {lines.map((l) => (
-                <p key={l} className="text-sm text-muted">{l}</p>
-              ))}
-              <p className="text-xs text-primary mt-2 font-medium">{sub}</p>
-            </NeumorphicBox>
-          ))}
+          {infoCards.map(({ title, lines, sub }, i) => {
+            const Icon = INFO_ICONS[i];
+            return (
+              <NeumorphicBox key={title} className="p-6 text-center">
+                <div className="w-12 h-12 bg-background rounded-lg border border-border flex items-center justify-center mx-auto mb-4">
+                  <Icon size={20} className="text-primary" />
+                </div>
+                <h4 className="font-bold text-sm mb-2">{title}</h4>
+                {lines.map((l) => (
+                  <p key={l} className="text-sm text-muted">{l}</p>
+                ))}
+                <p className="text-xs text-primary mt-2 font-medium">{sub}</p>
+              </NeumorphicBox>
+            );
+          })}
         </div>
       </section>
 
@@ -104,50 +84,50 @@ const ContactPage = () => {
                 <div className="w-16 h-16 rounded-full bg-background rounded-lg border border-border flex items-center justify-center mb-5">
                   <CheckCircle2 size={32} className="text-green-500" />
                 </div>
-                <h3 className="text-xl font-bold">Message Received!</h3>
+                <h3 className="text-xl font-bold">{t('contactPage.successTitle')}</h3>
                 <p className="text-muted text-sm mt-2 max-w-xs">
-                  Thank you for reaching out. Our team will respond within 24 hours.
+                  {t('contactPage.successText')}
                 </p>
                 <button
                   onClick={() => setSubmitted(false)}
                   className="nm-button text-sm text-muted mt-6 py-2.5 px-6"
                 >
-                  Send Another Message
+                  {t('contactPage.sendAnother')}
                 </button>
               </div>
             ) : (
               <>
-                <h3 className="text-xl font-bold mb-6">Send a Message</h3>
+                <h3 className="text-xl font-bold mb-6">{t('contactPage.formTitle')}</h3>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                      <label className="block text-sm font-medium mb-2 px-1">Full Name</label>
+                      <label className="block text-sm font-medium mb-2 px-1">{t('contactPage.fullName')}</label>
                       <input className="nm-input w-full" placeholder="Your name" {...register('name')} />
                       {errors.name && <p className="text-red-500 text-xs mt-1 px-1">{errors.name.message}</p>}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2 px-1">Phone (optional)</label>
+                      <label className="block text-sm font-medium mb-2 px-1">{t('contactPage.phoneOptional')}</label>
                       <input className="nm-input w-full" placeholder="+880 XXXX" {...register('phone')} />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2 px-1">Email Address</label>
+                    <label className="block text-sm font-medium mb-2 px-1">{t('contactPage.emailAddress')}</label>
                     <input className="nm-input w-full" type="email" placeholder="you@email.com" {...register('email')} />
                     {errors.email && <p className="text-red-500 text-xs mt-1 px-1">{errors.email.message}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2 px-1">Subject</label>
-                    <input className="nm-input w-full" placeholder="How can we help?" {...register('subject')} />
+                    <label className="block text-sm font-medium mb-2 px-1">{t('contactPage.subject')}</label>
+                    <input className="nm-input w-full" placeholder={t('contactPage.subjectPlaceholder')} {...register('subject')} />
                     {errors.subject && <p className="text-red-500 text-xs mt-1 px-1">{errors.subject.message}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2 px-1">Message</label>
+                    <label className="block text-sm font-medium mb-2 px-1">{t('contactPage.message')}</label>
                     <textarea
                       className="nm-input w-full min-h-[130px] resize-none"
-                      placeholder="Describe your query in detail..."
+                      placeholder={t('contactPage.messagePlaceholder')}
                       {...register('message')}
                     />
                     {errors.message && <p className="text-red-500 text-xs mt-1 px-1">{errors.message.message}</p>}
@@ -160,7 +140,7 @@ const ContactPage = () => {
                   >
                     {loading
                       ? <Loader2 className="animate-spin" size={20} />
-                      : <><Send size={17} /> Send Message</>
+                      : <><Send size={17} /> {t('contactPage.sendButton')}</>
                     }
                   </button>
                 </form>
